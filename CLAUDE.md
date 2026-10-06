@@ -2,6 +2,7 @@
 
 > Diese Datei liegt im Root des Repos. Claude Code liest sie bei jedem Teammitglied automatisch zu Beginn jeder Sitzung.
 > Ändern nur per Pull Request mit Zustimmung des Teams.
+> Die wichtigsten Git-Regeln (kein Push auf `main`, kein Force-Push, Review Pflicht) sind zusätzlich per Branch Protection in GitHub abgesichert. Diese Datei ersetzt das nicht, sondern sorgt dafür, dass Claude das Projekt versteht und sich im Alltag sauber verhält.
 
 Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. Das oberste Ziel dieser Regeln:
 **Niemand macht die Arbeit eines anderen kaputt oder unvollständig.**
@@ -13,9 +14,8 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 - **Anwendung:** Web-App für personalisierte Lasergravuren (Upload → KI-Bildaufbereitung → Warenkorb → laserfertige Produktionsdatei). Läuft für Entwicklung und Demos lokal.
 - **Tech Stack (festgelegt, nicht ändern):** Python 3.11–3.13, FastAPI, SQLAlchemy, SQLite; Bilddateien und Produktionsdateien (PNG, JPEG, SVG, DXF) im Dateisystem, in der Datenbank nur der Pfad. Frontend: HTML, CSS, JavaScript ohne Framework. KI-Bildaufbereitung mit vortrainierten Modellen (rembg/u2net) lokal auf dem Server.
 - **Architektur:** modularer Monolith mit Schichten. Router (Endpunkte) → Services (Logik) → Models (Datenbank). Logik gehört in Services, nicht in Router.
-- **Stories:** Die 15 User Stories mit Akzeptanzkriterien liegen in `docs/user-stories.md`. Vor jeder Aufgabe die passende Story lesen; die Akzeptanzkriterien sind der Maßstab.
-- **Starten:** `uvicorn app.main:app --reload`
-- **Testen:** `pytest`
+- **Stories:** Jede Aufgabe gehört zu einer der 15 User Stories (US01–US15). Die Akzeptanzkriterien der Story sind der Maßstab. Liegen sie dir nicht vor, frag das Teammitglied danach, statt sie zu erraten.
+- **Tests:** laufen mit `pytest`.
 - **Sprache:** Kommentare, Commit-Nachrichten und Erklärungen auf Deutsch; Variablen-, Funktions- und Dateinamen auf Englisch.
 
 ## 1. Nur die aktuelle Aufgabe bearbeiten
@@ -42,7 +42,7 @@ Manche Dateien betreffen alle. Diese änderst du **nur, wenn das Teammitglied au
 ## 3. Wer arbeitet woran?
 
 - Jede Aufgabe ist ein Issue mit einer **zugewiesenen Person**. Wer zugewiesen ist, „besitzt“ die Arbeit daran.
-- Bevor du anfängst: führe `git fetch` aus und prüfe mit `git branch -r`, ob es Branches gibt, die dieselben Dateien betreffen könnten. Offene Pull Requests kannst du nur sehen, wenn das GitHub-Tool (`gh`) eingerichtet ist; sonst frag das Teammitglied danach. Bei Überschneidungen: darauf hinweisen und vorschlagen, sich abzusprechen.
+- Wenn die Aufgabe Dateien berührt, die vermutlich auch andere brauchen (z. B. gemeinsame Bausteine aus Abschnitt 2), frag das Teammitglied, ob gerade jemand daran arbeitet. Bei Überschneidungen: darauf hinweisen und vorschlagen, sich abzusprechen.
 - Du arbeitest **nie im Branch einer anderen Person** und änderst keine fremden Pull Requests.
 
 ## 4. Git-Regeln
