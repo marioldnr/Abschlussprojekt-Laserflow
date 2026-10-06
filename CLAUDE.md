@@ -76,9 +76,10 @@ Wenn eine dieser Dateien in `git status` auftaucht: nicht committen, sondern auf
 Eine Aufgabe ist erst fertig, wenn:
 
 - alle Akzeptanzkriterien der Story erfüllt sind,
-- Tests für Normalfall, ungültige Eingaben und Grenzfälle existieren,
-- `pytest` vollständig grün ist (auch die Tests der anderen),
-- der Pull Request von einer anderen Person reviewt wurde.
+- der Code von einer zweiten Person überprüft wurde (Review im Pull Request),
+- Testfälle erstellt wurden,
+- die Dokumentation, wenn nötig, angepasst wurde,
+- der Code auf GitHub hinzugefügt wurde (Pull Request in `main` gemergt).
 
 ## 8. Wir lernen, Claude erklärt
 
