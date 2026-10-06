@@ -17,7 +17,7 @@
 - **Stakeholder:** die Lehrkräfte
 - **Repo:** `marioldnr/Abschlussprojekt-Laserflow`
 - **Board:** GitHub Project „Laserflow Scrumban“
-- **Tech-Stack:** _noch offen_ (TODO, wird im Team entschieden und hier eingetragen)
+- **Tech-Stack:** Python 3.11–3.13, FastAPI, SQLAlchemy, SQLite; Frontend HTML/CSS/JavaScript ohne Framework; KI-Bildaufbereitung lokal mit rembg/u2net. Details und Architektur: `CLAUDE.md`, Abschnitt 0.
 
 ## 3. Nutzerrollen im Produkt
 
@@ -147,4 +147,5 @@ Rollenplan für alle Sprints: TODO
 |---|---|---|
 | 2026-10-06 | Vorgehen Scrumban mit GitHub Issues + GitHub Project als Board | Vorgabe RDF, alles an einem Ort |
 | 2026-10-06 | Product Backlog bleibt offen, neue Stories als Issues ab US16 | Scrum: Backlog wird fortlaufend angepasst |
+| 2026-10-06 | Tech-Stack: FastAPI + SQLAlchemy + SQLite, Frontend ohne Framework, rembg lokal | lokal lauffähig, keine externen Dienste |
 | 2026-10-06 | Regeln für alle KIs in `CLAUDE.md`, Projektwissen in `docs/PROJEKT-BRAIN.md` | Jedes Teammitglied nutzt eigenen Claude-Account, alle sollen gleich arbeiten |
