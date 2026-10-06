@@ -16,13 +16,35 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 - **Architektur:** modularer Monolith mit Schichten. Router (Endpunkte) → Services (Logik) → Models (Datenbank). Logik gehört in Services, nicht in Router.
 - **Stories:** Jede Aufgabe gehört zu einer der 15 User Stories (US01–US15). Die Akzeptanzkriterien der Story sind der Maßstab. Liegen sie dir nicht vor, frag das Teammitglied danach, statt sie zu erraten.
 - **Tests:** laufen mit `pytest`.
-- **Sprache:** Kommentare, Commit-Nachrichten und Erklärungen auf Deutsch; Variablen-, Funktions- und Dateinamen auf Englisch.
+- **Sprache:** Kommentare, Docstrings, Doku, Commit-Nachrichten und Erklärungen auf Deutsch; Variablen-, Funktions- und Dateinamen auf Englisch.
+
+### Wie wir arbeiten: Scrumban (nach dem RDF-Leitfaden)
+
+Scrumban = Scrum (Rollen, Events, Artefakte) + Kanban (Board, WIP-Limit). Daran orientierst du dich bei jeder Aufgabe.
+
+- **Rollen:** Product Owner (PO) und Scrum Master (SM) wechseln jeden Sprint, alle sind dauerhaft Developers. Der **PO** pflegt und priorisiert das Product Backlog und entscheidet, **was** gebaut wird. Der **SM** moderiert die Events und räumt Hindernisse weg (Coach, kein Chef). Die **Developers** entscheiden, **wie** umgesetzt wird. Die Lehrkräfte sind die Stakeholder.
+- **Artefakte:** Das **Product Backlog** (alle Stories, vom PO priorisiert) wird laufend erweitert und angepasst, neue Stories sind normal. Das **Sprint Backlog** besteht aus Sprint Goal, ausgewählten Stories und Tasks und gehört den Developers. Das **Increment** ist alles, was die Definition of Done erfüllt; es muss am Sprintende nutzbar sein.
+- **Events:**
+  - **Sprint:** **4 Wochen.** Sprint Review und Retro können sich um bis zu eine Woche nach hinten verschieben, je nachdem, wann die Lehrkräfte Zeit haben. Ein laufender Sprint wird nicht willkürlich verlängert oder verkürzt.
+  - **Sprint Planning:** 30–60 Min., alle dabei, SM moderiert. Warum? (Sprint Goal), Was? (PO schlägt vor, Developers wählen), Wie? (Stories in Tasks zerlegen). Schätzen mit Planning Poker.
+  - **Weekly** statt Daily, einmal pro Woche: Was habe ich beigetragen, was mache ich als Nächstes, gibt es Hindernisse?
+  - **Sprint Review:** ca. 15 Min. mit den Lehrkräften, das Increment zeigen und Feedback holen. Der PO lädt ein.
+  - **Retrospektive:** nach dem Review, der SM wählt die Methode, das Ergebnis sind konkrete Verbesserungen.
+- **Board:** `Backlog` → `ToDo (Sprint)` → `In Progress` (**WIP-Limit 3**) → `To Approve / Feedback` → `Done (Increment)`.
+- **User Stories:** „Als [Rolle] möchte ich [Funktion], damit [Nutzen]“. Sie beschreiben das Was und Warum, nicht das Wie. Gute Stories folgen INVEST (unabhängig, verhandelbar, wertvoll, schätzbar, klein, testbar). Akzeptanzkriterien sind messbar und prüfbar.
+- **Werte:** Commitment, Courage, Focus, Openness, Respect.
+
+Was das für dich heißt:
+- Du arbeitest nur an Aufgaben aus dem **aktuellen Sprint**. Steht eine Aufgabe nicht im Sprint oder ist das WIP-Limit erreicht, weist du darauf hin, bevor du anfängst.
+- **Erst fertig machen, dann Neues anfangen.**
+- Neue Ideen oder Wünsche während des Sprints kommen als Issue ins Backlog, nicht in den laufenden Sprint, wenn sie das Sprint Goal gefährden.
+- Typische Fehler sprichst du an: kein Sprint Goal, DoD nicht eingehalten, Scope mitten im Sprint geändert.
 
 ## 1. Nur die aktuelle Aufgabe bearbeiten
 
 - Du arbeitest **ausschließlich an der Aufgabe (Issue/Task), die dir das Teammitglied gerade nennt**. Frag zu Beginn nach, wenn unklar ist, welche das ist.
 - Du nennst **zu Beginn die Dateien, die du ändern oder anlegen willst**, und begründest sie kurz. Brauchst du später weitere Dateien, fragst du erneut.
-- Tests zur eigenen Aufgabe gehören dazu und dürfen angelegt werden.
+- Tests und Dokumentation zur eigenen Aufgabe gehören dazu und dürfen angelegt bzw. geändert werden (Doku: siehe Abschnitt 8).
 - Du änderst **keine Dateien „nebenbei“**: kein Aufräumen, kein Umformatieren, kein Umbenennen, keine „Verbesserungen“ an Code, der nicht zur Aufgabe gehört. Wenn dir etwas auffällt, **schlägst du es vor** (z. B. als neues Issue), statt es zu ändern.
 - Du **löschst, verschiebst oder benennst keine Dateien um**, ohne ausdrückliche Zustimmung.
 - Wenn die Aufgabe eine Datei braucht, die jemand anderes gerade bearbeitet (siehe Abschnitt 3), **hörst du auf und sagst Bescheid**, statt sie zu ändern.
@@ -37,7 +59,9 @@ Manche Dateien betreffen alle. Diese änderst du **nur, wenn das Teammitglied au
 - Gemeinsame Bausteine, die mehrere Stories nutzen (z. B. Layout/Navigation, Login-/Rechteprüfung, Datenbank-Verbindung, E-Mail-Versand)
 - `README.md`, `CLAUDE.md`, `.gitignore`, alles unter `.github/` und `docs/`
 
-Änderungen daran gehören in einen **eigenen, kleinen Pull Request**, nicht versteckt in einem Feature.
+**Ausnahme:** Moduldokus unter `docs/module/` (siehe Abschnitt 8) dürfen im Feature-PR der eigenen Story geändert oder neu angelegt werden. Die Vorlage `docs/module/_vorlage.md` und `docs/einstieg.md` bleiben gemeinsame Dateien.
+
+Änderungen an gemeinsamen Dateien gehören in einen **eigenen, kleinen Pull Request**, nicht versteckt in einem Feature.
 
 ## 3. Wer arbeitet woran?
 
@@ -52,7 +76,8 @@ Manche Dateien betreffen alle. Diese änderst du **nur, wenn das Teammitglied au
 - **Kein Force-Push**, kein `git reset --hard` auf geteilten Branches, kein Umschreiben der History.
 - **Merge-Konflikte nie automatisch auflösen**, indem eine Seite einfach überschrieben wird. Konflikt zeigen, erklären, und das Teammitglied entscheidet; bei fremdem Code mit der anderen Person absprechen.
 - **Kleine Commits** mit klarer Nachricht, z. B. `US04: Dateityp-Prüfung für Upload ergänzt`. Nur Dateien committen, die zur Aufgabe gehören (`git add <datei>`, nicht blind `git add .`).
-- Pull Request mit `Closes #<Nummer>`. **Mindestens eine andere Person reviewt.** Claude mergt nie, approvt nie und schließt keine Issues.
+- Pull Request mit `Closes #<Nummer>`. **Mindestens eine andere Person reviewt.** Claude approvt nie und schließt keine Issues.
+- **Nichts hochladen ohne Go:** Claude committet, pusht, öffnet Pull Requests oder mergt **nur, wenn das Teammitglied ausdrücklich das Go dafür gibt**. Vorher zeigt Claude, was genau geändert oder hochgeladen wird, und wartet auf die Antwort. Ein Go gilt nur für den genannten Schritt, nicht für alle folgenden.
 
 ## 5. Nicht ins Repo
 
@@ -76,15 +101,34 @@ Wenn eine dieser Dateien in `git status` auftaucht: nicht committen, sondern auf
 Eine Aufgabe ist erst fertig, wenn:
 
 - alle Akzeptanzkriterien der Story erfüllt sind,
-- der Code von einer zweiten Person überprüft wurde (Review im Pull Request),
-- Testfälle erstellt wurden,
-- die Dokumentation, wenn nötig, angepasst wurde,
-- der Code auf GitHub hinzugefügt wurde (Pull Request in `main` gemergt).
+- Tests für Normalfall, ungültige Eingaben und Grenzfälle existieren,
+- `pytest` vollständig grün ist (auch die Tests der anderen),
+- Docstrings und die Moduldoku zur Story aktuell sind (siehe Abschnitt 8): Ein Entwickler ohne Vorwissen versteht damit, was das Modul tut und wie man es erweitert,
+- der Pull Request von einer anderen Person reviewt wurde.
 
-## 8. Wir lernen, Claude erklärt
+## 8. Dokumentation für neue Entwickler
+
+Ziel: Ein Software Engineer, der LaserFlow nicht kennt, kann sich allein über `docs/` und den Code einarbeiten.
+
+**Aufbau:**
+
+- `docs/einstieg.md`: Setup, Start, Tests, Architekturüberblick, Links zu allen Moduldokus (gemeinsame Datei).
+- `docs/module/<bereich>.md`: eine Datei pro fachlichem Bereich (z. B. `bild-upload.md`, `warenkorb.md`), immer nach der Vorlage `docs/module/_vorlage.md`.
+- Docstrings im Code.
+
+**Bei jeder Code-Änderung:**
+
+- **Docstrings** (Deutsch) für jede neue oder geänderte Funktion in Services und Routern: was sie tut, Parameter, Rückgabe, mögliche Fehler. Bei nicht offensichtlichen Stellen auch das *Warum*.
+- **Moduldoku** des betroffenen Bereichs aktualisieren. Gibt es für den Bereich noch keine, legst du sie nach der Vorlage an und nennst das zu Beginn (Abschnitt 1).
+- In der Moduldoku änderst du nur die Teile, die deine Story betreffen. Abschnitte zu fremden Stories schreibst du nicht um, sondern weist auf Unstimmigkeiten hin.
+- Die Doku beschreibt den **Ist-Stand**: nichts dokumentieren, was es (noch) nicht gibt; bekannte Grenzen ehrlich unter „Bekannte Grenzen“ nennen.
+- Bewusste Entscheidungen kurz mit Begründung festhalten, damit niemand sie später versehentlich „repariert“.
+- **Am Ende der Aufgabe** nennst du ausdrücklich, welche Doku-Abschnitte du geändert hast oder warum keine Änderung nötig war.
+
+## 9. Wir lernen, Claude erklärt
 
 Wir wollen selbst programmieren und unseren Code in der Präsentation erklären können. Claude erklärt zuerst den Lösungsweg und arbeitet in kleinen, nachvollziehbaren Schritten, statt ganze Features auf einmal zu schreiben.
 
-## 9. Im Zweifel: fragen
+## 10. Im Zweifel: fragen
 
 Wenn eine Regel unklar ist, eine Aufgabe fremde oder gemeinsame Dateien berührt oder eine Story widersprüchlich ist: **anhalten und nachfragen**, nicht raten.
