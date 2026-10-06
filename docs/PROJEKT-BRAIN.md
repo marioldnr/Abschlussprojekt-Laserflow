@@ -30,7 +30,14 @@
 
 ## 4. Die User Stories (Product Backlog)
 
-Die vollständigen Stories mit Acceptance Criteria stehen als Issues **US01–US15** im Repo (Label `user-story`). Das Issue ist immer die maßgebliche Quelle.
+**Das Product Backlog ist nicht fertig.** Es wird laufend weiterentwickelt: Der PO kann jederzeit neue Stories ergänzen, ändern, teilen oder umpriorisieren, z. B. nach Feedback im Sprint Review.
+
+- **Maßgeblich sind immer die GitHub-Issues mit dem Label `user-story`** und ihre Reihenfolge auf dem Board, nicht diese Tabelle. Prüfe dort den aktuellen Stand.
+- Neue Stories bekommen die nächste Nummer (`US16`, `US17`, …), das Label `user-story`, Acceptance Criteria als Checkboxen und Abhängigkeiten, und landen in der Spalte `Backlog`.
+- Neue Stories kommen **nicht in den laufenden Sprint**, außer das Team entscheidet das gemeinsam und das Sprint Goal ist nicht gefährdet. Normalerweise werden sie im nächsten Sprint Planning berücksichtigt.
+- Die KI legt keine Stories selbst an und ändert keine; sie darf Formulierungen vorschlagen, der PO entscheidet.
+
+Stand der Übersicht: 2026-10-06 (Start mit 15 Stories). Bei neuen Stories die Tabelle per PR ergänzen.
 
 | # | Story | Rolle | Kurz | Hängt ab von |
 |---|---|---|---|---|
@@ -73,7 +80,7 @@ Scrumban = **Scrum** (Rollen, Events, Artefakte) + **Kanban** (Board, WIP-Limit)
 - **PO und SM wechseln jeden Sprint.** Jede Person hat also 1–2 Rollen gleichzeitig.
 
 ### Artefakte
-- **Product Backlog:** alle Stories, geordnet nach Priorität (gehört dem PO).
+- **Product Backlog:** alle Stories, geordnet nach Priorität (gehört dem PO). Lebendes Dokument, wächst und ändert sich laufend.
 - **Sprint Backlog:** Sprint Goal + ausgewählte Stories + Tasks (gehört den Developers).
 - **Increment:** alles, was fertig ist und die Definition of Done erfüllt; muss am Sprintende nutzbar sein.
 
@@ -139,4 +146,5 @@ Rollenplan für alle Sprints: TODO
 | Datum | Entscheidung | Warum |
 |---|---|---|
 | 2026-10-06 | Vorgehen Scrumban mit GitHub Issues + GitHub Project als Board | Vorgabe RDF, alles an einem Ort |
+| 2026-10-06 | Product Backlog bleibt offen, neue Stories als Issues ab US16 | Scrum: Backlog wird fortlaufend angepasst |
 | 2026-10-06 | Regeln für alle KIs in `CLAUDE.md`, Projektwissen in `docs/PROJEKT-BRAIN.md` | Jedes Teammitglied nutzt eigenen Claude-Account, alle sollen gleich arbeiten |
