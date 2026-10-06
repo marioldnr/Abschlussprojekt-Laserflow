@@ -114,18 +114,15 @@ Kein Sprint Goal · DoD nicht eingehalten · Scope mitten im Sprint ändern · R
 4. Pull Request mit `Closes #<Nummer>`, erfüllte Kriterien abhaken. Karte auf `To Approve / Feedback`.
 5. Review durch mindestens eine andere Person, Abnahme durch den PO, dann Merge und `Done (Increment)`.
 
-## 8. Definition of Done (Entwurf, im Team zu bestätigen)
+## 8. Definition of Done
 
-Eine Story ist fertig, wenn:
-- alle Acceptance Criteria erfüllt und im PR abgehakt sind,
-- mindestens eine weitere Person den Code reviewt hat,
-- die Person, die ihn geschrieben hat, ihn erklären kann,
-- die Funktion lokal getestet wurde,
-- keine Secrets im Code stehen,
-- Doku/README bei Bedarf aktualisiert ist,
-- der PO abgenommen hat.
+Im Team vereinbart (gleicher Wortlaut wie in `CLAUDE.md`, Abschnitt 7). Eine Aufgabe ist erst fertig, wenn:
 
-Konzepte und Dokumente: vollständig, von einer weiteren Person gegengelesen, vom PO abgenommen.
+- alle Akzeptanzkriterien der Story erfüllt sind,
+- der Code von einer zweiten Person überprüft wurde (Review im Pull Request),
+- Testfälle erstellt wurden,
+- die Dokumentation, wenn nötig, angepasst wurde,
+- der Code auf GitHub hinzugefügt wurde (Pull Request in `main` gemergt).
 
 ## 9. Aktueller Stand
 
