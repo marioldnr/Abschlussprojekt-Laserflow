@@ -1,0 +1,258 @@
+/*
+ * LaserFlow – components.css (wiederverwendbare Bausteine)
+ *
+ * Enthält: Feature-Karten, Produktkacheln, Schritt-Liste, Kontaktkarte.
+ * Diese Klassen dürfen auf jeder Seite benutzt werden. Neue Bausteine,
+ * die mehrere Seiten brauchen, gehören hierher (nach Absprache).
+ */
+
+/* ---------- Drei Versprechen ---------- */
+
+.features {
+  padding: 0 0 40px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.feature {
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: transform 0.35s var(--ease), border-color 0.35s;
+}
+
+.feature svg {
+  color: var(--accent);
+  transition: transform 0.5s var(--ease);
+}
+
+.feature:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+}
+
+.feature:hover svg {
+  transform: rotate(90deg) scale(1.15);
+}
+
+.feature h3 {
+  font-size: 1.25rem;
+  margin: 14px 0 6px;
+}
+
+.feature p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ---------- Produktkacheln ---------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.tile {
+  position: relative;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.4s;
+}
+
+.tile:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent);
+}
+
+.tile-image {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--bg-alt);
+}
+
+/* Der Bildinhalt zoomt beim Darüberfahren (später echtes <img> statt <span>) */
+.tile-image > * {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background:
+    repeating-linear-gradient(45deg, transparent 0 14px, color-mix(in srgb, var(--border) 50%, transparent) 14px 15px);
+  transition: transform 0.6s var(--ease);
+}
+
+.tile:hover .tile-image > * {
+  transform: scale(1.1);
+}
+
+.tile-body {
+  padding: 16px 18px 18px;
+}
+
+.tile h3 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* "Jetzt gestalten →" schiebt sich beim Darüberfahren herein */
+.tile-cta {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s, transform 0.4s var(--ease);
+}
+
+.tile:hover .tile-cta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ---------- Ablauf ---------- */
+
+.steps {
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+/* Verbindungslinie zwischen den Kreisen, wächst beim Erscheinen von links nach rechts */
+.steps::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.4s var(--ease) 0.3s;
+}
+
+.steps.is-visible::before {
+  transform: scaleX(1);
+}
+
+.steps li {
+  position: relative;
+}
+
+.step-number {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-alt);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+  transition: background 0.3s, color 0.3s, transform 0.4s var(--ease), box-shadow 0.3s;
+}
+
+.steps li:hover .step-number {
+  background: var(--accent);
+  color: var(--on-accent);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 8px var(--glow);
+}
+
+.steps h3 {
+  font-size: 1.25rem;
+  margin: 18px 0 6px;
+}
+
+.steps p {
+  color: var(--muted);
+  margin: 0;
+}
+
+/* ---------- Kontakt ---------- */
+
+.contact-card {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 40px;
+  align-items: center;
+  padding: 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1.5);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Akzentlinie oben an der Karte */
+.contact-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
+  background-size: 200% 100%;
+  animation: engrave 6s linear infinite;
+}
+
+.contact-card h2 {
+  margin-bottom: 8px;
+}
+
+.contact-card p {
+  color: var(--muted);
+}
+
+/* ---------- Kleine Bildschirme ---------- */
+
+@media (max-width: 900px) {
+  .tiles,
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps::before {
+    display: none;
+  }
+
+  .features-grid,
+  .contact-card {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-card {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 520px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .tiles {
+    gap: 12px;  /* Produkte bleiben zweispaltig, nur enger */
+  }
+}

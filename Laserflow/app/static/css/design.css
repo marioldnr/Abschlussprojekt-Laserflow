@@ -1,0 +1,197 @@
+/*
+ * LaserFlow – design.css (Grundlage für JEDE Seite)
+ *
+ * Enthält: Design-Tokens (Farben, Schriften, Abstände), Grundstile, Buttons,
+ * Animationen und die Regel für "Bewegung reduzieren".
+ * Farben und Schriften NIE direkt in andere Dateien schreiben, sondern immer
+ * die Variablen von hier benutzen (z. B. var(--accent)).
+ * Regeln und Beispiele: docs/design.md
+ */
+
+/* ========== Design-Tokens ========== */
+
+:root {
+  /* Farben */
+  --bg: #161412;           /* Seitenhintergrund: warmes Anthrazit */
+  --bg-alt: #1f1c19;       /* abwechselnde Abschnitte */
+  --surface: #26221e;      /* Karten, Menüs, Badges */
+  --text: #f3ede6;         /* Haupttext */
+  --muted: #b3a89c;        /* Nebentext */
+  --accent: #97ffff;       /* Akzent: DarkSlateGray1 */
+  --accent-2: #d2ffff;     /* hellere Variante für Verläufe */
+  --on-accent: #10201f;    /* Schrift auf Akzentflächen */
+  --border: #3a342e;       /* Linien und Rahmen */
+  --glow: rgba(151, 255, 255, 0.3); /* Leuchten, Schatten im Akzentton */
+
+  /* Schriften */
+  --font-head: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Inter", "Segoe UI", Arial, sans-serif;
+  --head-weight: 600;
+
+  /* Form und Bewegung */
+  --radius: 10px;
+  --max-width: 1160px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1); /* weiche Bewegung für alle Übergänge */
+}
+
+/* ========== Grundlagen ========== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;  /* sanftes Scrollen bei Klick auf Menüpunkte */
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-head);
+  font-weight: var(--head-weight);
+  line-height: 1.15;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.eyebrow {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+/* Buttons: beim Darüberfahren hebt sich der Button und ein Lichtstreifen läuft durch */
+.button {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  padding: 13px 26px;
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-20deg);
+}
+
+.button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px var(--glow);
+}
+
+.button:hover::after {
+  animation: shine 0.8s var(--ease);
+}
+
+.button-ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.button-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.button-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+/* ========== 4. Animationen ========== */
+
+/* Elemente mit "reveal" gleiten beim Scrollen von unten herein (layout.js setzt "is-visible") */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-delay   { transition-delay: 0.12s; }
+.reveal-delay-2 { transition-delay: 0.24s; }
+.reveal-delay-3 { transition-delay: 0.36s; }
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 var(--glow); }
+  70%  { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes engrave {
+  0%, 100% { background-position: 100% 0; }
+  50%      { background-position: 0 0; }
+}
+
+@keyframes scan {
+  0%, 100% { top: 8%; opacity: 0; }
+  10%, 90% { opacity: 1; }
+  50%      { top: 92%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-60px, 40px); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes shine {
+  to { left: 125%; }
+}
+
+/* Wer im Betriebssystem "Bewegung reduzieren" eingestellt hat, bekommt keine Animationen */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

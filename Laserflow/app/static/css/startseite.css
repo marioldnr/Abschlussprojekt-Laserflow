@@ -1,0 +1,158 @@
+/*
+ * LaserFlow – startseite.css (nur für index.html)
+ *
+ * Enthält nur, was es ausschließlich auf der Startseite gibt:
+ * den "Über uns"-Bereich mit Lichtschein, Gravur-Schrift, Bildrahmen und Badge.
+ */
+
+/* ---------- Über uns ---------- */
+
+.about {
+  position: relative;
+  padding: 100px 0 90px;
+  overflow: hidden;
+}
+
+/* weicher Lichtschein im Hintergrund, bewegt sich langsam */
+.glow {
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 640px;
+  height: 640px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow), transparent 65%);
+  filter: blur(20px);
+  animation: float 12s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.about-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.about h1 {
+  font-size: clamp(2.3rem, 4.6vw, 3.8rem);
+  margin: 0 0 24px;
+}
+
+/* "eingraviert mit Licht": Farbverlauf, der wie ein Laserstrahl durch den Text wandert */
+.engrave {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 40%, #fff 50%, var(--accent-2) 60%, var(--accent) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: engrave 5s ease-in-out infinite;
+}
+
+.about-text p {
+  color: var(--muted);
+  max-width: 520px;
+}
+
+.about-image {
+  position: relative;
+}
+
+/* Bildrahmen: kippt leicht mit der Maus (startseite.js) und hat einen versetzten Akzentrahmen */
+.image-frame {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  transform-style: preserve-3d;
+}
+
+.about-image::before {
+  content: "";
+  position: absolute;
+  inset: 18px -18px -18px 18px;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  z-index: -1;
+  transition: inset 0.4s var(--ease);
+}
+
+.about-image:hover::before {
+  inset: 26px -26px -26px 26px;
+}
+
+.about-image:hover .image-frame {
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+}
+
+.image-frame img {
+  width: 100%;
+  transition: transform 0.6s var(--ease);
+}
+
+.about-image:hover .image-frame img {
+  transform: scale(1.05);
+}
+
+/* Laserlinie, die über das Bild fährt */
+.laser-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-2);
+  box-shadow: 0 0 12px 3px var(--glow);
+  animation: scan 4s ease-in-out infinite;
+}
+
+.badge {
+  position: absolute;
+  left: -24px;
+  bottom: 28px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-head);
+  font-weight: var(--head-weight);
+  font-size: 1.6rem;
+  line-height: 1;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+  animation: bob 5s ease-in-out infinite;
+}
+
+.badge small {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ---------- Kleine Bildschirme ---------- */
+
+@media (max-width: 900px) {
+  .about {
+    padding-top: 60px;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-image {
+    margin: 0 18px 0 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .badge {
+    left: 10px;
+  }
+}
