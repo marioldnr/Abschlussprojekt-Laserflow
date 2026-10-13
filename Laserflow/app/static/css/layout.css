@@ -250,17 +250,22 @@ main {
   padding-left: 18px;
 }
 
+/* Anmelden-Knopf im Menü: gleicher Glas-Look wie .button */
 .dropdown .dropdown-primary {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--glass-strong), var(--glass-soft));
+  border: 1px solid var(--glass-border);
+  color: var(--glass-text);
   text-align: center;
   font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .dropdown .dropdown-primary:hover {
-  background: var(--accent-2);
-  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--glass-hover), var(--glass-strong));
+  border-color: var(--accent);
+  color: #fff;
   padding-left: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 18px var(--glow);
 }
 
 .dropdown-divider {

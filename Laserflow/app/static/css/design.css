@@ -23,6 +23,13 @@
   --border: #3a342e;       /* Linien und Rahmen */
   --glow: rgba(151, 255, 255, 0.3); /* Leuchten, Schatten im Akzentton */
 
+  /* Glas-Effekt (Buttons) */
+  --glass-soft: rgba(151, 255, 255, 0.05);   /* Glasfläche, schwach */
+  --glass-strong: rgba(151, 255, 255, 0.18); /* Glasfläche, kräftig */
+  --glass-hover: rgba(151, 255, 255, 0.30);  /* Glasfläche beim Darüberfahren */
+  --glass-border: rgba(151, 255, 255, 0.40); /* Glasrand */
+  --glass-text: #e6ffff;                     /* Schrift auf Glas */
+
   /* Schriften */
   --font-head: "Cormorant Garamond", Georgia, serif;
   --font-body: "Inter", "Segoe UI", Arial, sans-serif;
@@ -82,19 +89,31 @@ img {
   margin: 0 0 8px;
 }
 
-/* Buttons: beim Darüberfahren hebt sich der Button und ein Lichtstreifen läuft durch */
+/* Buttons im Glas-Look:
+ * halbdurchsichtige, leicht cyanfarbene Fläche, die den Hintergrund weichzeichnet,
+ * eine feine helle Kante oben (Lichtreflex) und ein leuchtender Rand.
+ * Beim Darüberfahren hebt sich der Button, leuchtet stärker und ein Lichtstreifen läuft durch.
+ */
 .button {
   position: relative;
   overflow: hidden;
   display: inline-block;
   padding: 13px 26px;
-  background: var(--accent);
-  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--glass-strong), var(--glass-soft));
+  color: var(--glass-text);
   text-decoration: none;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   font-weight: 600;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),   /* Lichtkante oben */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),        /* Schattenkante unten */
+    0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease),
+              background 0.3s var(--ease), border-color 0.3s var(--ease), color 0.3s;
 }
 
 .button::after {
@@ -104,27 +123,35 @@ img {
   left: -75%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
   transform: skewX(-20deg);
 }
 
 .button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px var(--glow);
+  background: linear-gradient(135deg, var(--glass-hover), var(--glass-strong));
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 0 0 1px var(--glow),
+    0 12px 32px var(--glow);
 }
 
 .button:hover::after {
   animation: shine 0.8s var(--ease);
 }
 
+/* Zweiter Button: neutrales, fast farbloses Glas */
 .button-ghost {
-  background: transparent;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
   color: var(--text);
-  border-color: var(--border);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .button-ghost:hover {
-  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
   color: var(--accent);
 }
 
