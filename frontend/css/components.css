@@ -225,6 +225,193 @@
   color: var(--muted);
 }
 
+/* ---------- Formulare ----------
+ * HTML-Aufbau und Verhalten: docs/design.md, Abschnitt "Formulare".
+ * Das Verhalten (Prüfen, Fehler anzeigen) liefert js/modules/form.js.
+ */
+
+.form {
+  display: grid;
+  gap: 18px;
+}
+
+/* Zwei Felder nebeneinander, z. B. Vorname/Nachname oder PLZ/Ort */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-row-narrow-first {
+  grid-template-columns: 0.6fr 1.4fr;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  align-content: start; /* Felder nebeneinander bleiben bündig, auch wenn nur eines eine Fehlermeldung hat */
+}
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.field-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.input::placeholder {
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
+
+.input:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+/* Fehlerzustand: setzt form.js über aria-invalid und die Klasse has-error */
+.field.has-error .input,
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.field.has-error .input:focus {
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}
+
+.field-error {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+
+/* Passwortfeld mit Knopf zum Anzeigen */
+.input-group {
+  position: relative;
+}
+
+.input-group .input {
+  padding-right: 48px;
+}
+
+.input-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 0.2s, background 0.2s;
+}
+
+.input-toggle:hover,
+.input-toggle[aria-pressed="true"] {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.input-toggle .icon-hide { display: none; }
+.input-toggle[aria-pressed="true"] .icon-show { display: none; }
+.input-toggle[aria-pressed="true"] .icon-hide { display: block; }
+
+/* Checkbox mit Text daneben */
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.checkbox input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Sichtbarer Fokus für Tastaturbedienung */
+.input-toggle:focus-visible,
+.checkbox input:focus-visible,
+.text-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Hinweis über dem Formular (Fehler vom Server, Erfolg) */
+.alert {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+}
+
+.alert-error {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+.alert-success {
+  color: var(--success);
+  background: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success) 40%, transparent);
+}
+
+.alert-info {
+  color: var(--text);
+  background: var(--glass-soft);
+  border-color: var(--glass-border);
+}
+
+/* Textlink im Fließtext, z. B. "Jetzt registrieren" */
+.text-link {
+  color: var(--accent);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.35s var(--ease);
+}
+
+.text-link:hover {
+  background-size: 100% 1px;
+}
+
 /* ---------- Kleine Bildschirme ---------- */
 
 @media (max-width: 900px) {
@@ -248,6 +435,11 @@
 }
 
 @media (max-width: 520px) {
+  .form-row,
+  .form-row-narrow-first {
+    grid-template-columns: 1fr;
+  }
+
   .steps {
     grid-template-columns: 1fr;
   }

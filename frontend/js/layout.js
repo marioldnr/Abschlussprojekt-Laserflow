@@ -46,10 +46,20 @@ updateHeader();
 /* ---------- 2. Benutzermenü ----------
  * Ob jemand angemeldet ist, weiß später das Backend (FastAPI).
  * Bis dahin simulieren wir es: seite.html?angemeldet=1 zeigt die Ansicht für Angemeldete.
- * Die Links (#) bekommen ihre echten Ziele mit den Stories für Login, Registrierung und Konto.
+ * "Anmelden" und "Registrieren" führen auf anmelden.html bzw. registrieren.html.
+ * Die Links für Angemeldete (#) bekommen ihre Ziele mit den Stories für Konto und Bestellhistorie.
  */
 const params = new URLSearchParams(window.location.search);
 const isLoggedIn = params.get("angemeldet") === "1";
+
+// Link zur Anmeldeseite merkt sich die aktuelle Seite (?weiter=...), damit der Kunde
+// nach dem Login dorthin zurückkehrt (Use Case "Anmelden": zum gewählten Produkt zurückkehren).
+// Auf den Anmelde- und Registrierungsseiten selbst wäre das sinnlos, dort zeigt der Link einfach auf die Anmeldung.
+const currentPage = window.location.pathname.split("/").pop() || "index.html";
+const isAuthPage = ["anmelden.html", "registrieren.html"].includes(currentPage);
+const loginHref = isAuthPage
+  ? "anmelden.html"
+  : `anmelden.html?weiter=${encodeURIComponent(currentPage + window.location.search + window.location.hash)}`;
 const userName = "Max Mustermann"; // Platzhalter, kommt später vom Backend
 
 const userButton = document.getElementById("user-button");
@@ -67,8 +77,8 @@ if (isLoggedIn) {
 } else {
   userDropdown.innerHTML = `
     <div class="dropdown-head">Willkommen bei <strong>LaserFlow</strong></div>
-    <a href="#" class="dropdown-primary" role="menuitem">Anmelden</a>
-    <a href="#" role="menuitem">Neu hier? Registrieren</a>
+    <a href="${loginHref}" class="dropdown-primary" role="menuitem">Anmelden</a>
+    <a href="registrieren.html" role="menuitem">Neu hier? Registrieren</a>
   `;
 }
 

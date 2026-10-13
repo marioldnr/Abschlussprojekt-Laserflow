@@ -1,0 +1,9 @@
+{
+  "name": "laserflow-frontend",
+  "private": true,
+  "description": "Frontend von LaserFlow (HTML, CSS, JavaScript ohne Framework). Nur für die Tests nötig, es gibt keine Abhängigkeiten.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

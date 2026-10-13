@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anmelden – LaserFlow</title>
+  <meta name="description" content="Melde dich bei LaserFlow an, um Gravuren zu bestellen.">
+
+  <!-- Gemeinsam für jede Seite: Schriften, Design, Layout, Bausteine, Verhalten (siehe docs/design.md) -->
+  <link rel="icon" href="img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="img/logo/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="js/layout.js" defer></script>
+
+  <!-- Nur für diese Seite -->
+  <link rel="stylesheet" href="css/anmeldung.css">
+  <script type="module" src="js/anmelden.js"></script>
+</head>
+<body>
+
+  <!-- Kopfbereich: wird beim Scrollen kompakter (Klasse "is-scrolled" setzt layout.js) -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-kopf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-kopf)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a href="index.html#ueber-uns">Über uns</a>
+        <a href="index.html#produkte">Produkte</a>
+        <a href="index.html#so-gehts">So funktioniert's</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Benutzer-Icon mit Menü: Inhalt hängt davon ab, ob man angemeldet ist (siehe layout.js) -->
+        <div class="user-menu">
+          <button class="icon-button" id="user-button" aria-haspopup="true" aria-expanded="false" aria-label="Benutzerkonto">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+            </svg>
+          </button>
+          <div class="dropdown" id="user-dropdown" role="menu">
+            <!-- wird von layout.js befüllt -->
+          </div>
+        </div>
+
+        <!-- Warenkorb-Icon mit Anzahl -->
+        <a href="#" class="icon-button cart" aria-label="Warenkorb">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 7h14l-1.5 11a2 2 0 0 1-2 1.7h-7a2 2 0 0 1-2-1.7z"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Anmelden: Aufbau nach Wireframe "Login" (LaserFlow_Dokumentation.pdf, Kapitel 1.2) -->
+    <section class="auth" aria-labelledby="login-title">
+      <div class="container">
+        <div class="auth-card reveal">
+          <div class="auth-head">
+            <span class="auth-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+              </svg>
+            </span>
+            <h1 id="login-title">Anmelden</h1>
+            <p>Willkommen zurück bei LaserFlow.</p>
+          </div>
+
+          <!-- novalidate: Wir prüfen selbst (js/modules/validation.js), damit alle Meldungen einheitlich auf Deutsch erscheinen -->
+          <form class="form" id="login-form" novalidate>
+            <p class="alert" data-form-alert role="alert" hidden></p>
+
+            <div class="field">
+              <label class="field-label" for="email">E-Mail-Adresse</label>
+              <input class="input" id="email" name="email" type="email" autocomplete="email" required aria-describedby="email-error" inputmode="email" spellcheck="false">
+              <p class="field-error" id="email-error" hidden></p>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="password">Passwort</label>
+              <div class="input-group">
+                <input class="input" id="password" name="password" type="password" autocomplete="current-password" required aria-describedby="password-error">
+                <button class="input-toggle" type="button" data-password-toggle aria-label="Passwort anzeigen" aria-pressed="false">
+                <svg class="icon-show" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-hide" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+                </button>
+              </div>
+              <p class="field-error" id="password-error" hidden></p>
+            </div>
+
+            <button class="button button-block" type="submit">Anmelden</button>
+          </form>
+
+          <p class="auth-switch">
+            Noch kein Konto? <a class="text-link" id="register-link" href="registrieren.html">Jetzt registrieren</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fußbereich: rechtliche Links und Copyright -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a href="index.html" class="logo logo-small" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-fuss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-fuss)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+      <nav class="footer-links" aria-label="Rechtliches">
+        <a href="#">Impressum</a>
+        <a href="#">Datenschutz</a>
+        <a href="#">AGB</a>
+        <a href="#">Versand</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+      <p>© 2026 LaserFlow – Abschlussprojekt</p>
+    </div>
+  </footer>
+
+</body>
+</html>

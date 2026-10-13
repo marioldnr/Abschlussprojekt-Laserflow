@@ -30,6 +30,12 @@
   --glass-border: rgba(151, 255, 255, 0.40); /* Glasrand */
   --glass-text: #e6ffff;                     /* Schrift auf Glas */
 
+  /* Rückmeldungen (Formulare, Hinweise) */
+  --danger: #ff9b8f;                         /* Fehlertext und -rahmen */
+  --danger-bg: rgba(255, 120, 105, 0.10);    /* Fläche für Fehlerhinweise */
+  --success: #8ff0c0;                        /* Erfolgstext */
+  --success-bg: rgba(110, 230, 170, 0.10);   /* Fläche für Erfolgshinweise */
+
   /* Schriften */
   --font-head: "Cormorant Garamond", Georgia, serif;
   --font-body: "Inter", "Segoe UI", Arial, sans-serif;
@@ -42,6 +48,12 @@
 }
 
 /* ========== Grundlagen ========== */
+
+/* Das hidden-Attribut gewinnt immer, auch gegen display aus Klassen (z. B. .form { display: grid }) */
+[hidden] {
+  display: none !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -92,7 +104,9 @@ img {
 /* Buttons im Glas-Look:
  * halbdurchsichtige, leicht cyanfarbene Fläche, die den Hintergrund weichzeichnet,
  * eine feine helle Kante oben (Lichtreflex) und ein leuchtender Rand.
- * Beim Darüberfahren hebt sich der Button, leuchtet stärker und ein Lichtstreifen läuft durch.
+ * Beim Darüberfahren wird der Button minimal größer, leuchtet stärker und ein Lichtstreifen läuft durch.
+ * Bewusst scale statt translateY: Ein nach oben verschobener Button "flüchtet" vor dem Mauszeiger,
+ * wenn dieser am unteren Rand steht, und flackert dann ständig zwischen Hover und Nicht-Hover.
  */
 .button {
   position: relative;
@@ -128,7 +142,7 @@ img {
 }
 
 .button:hover {
-  transform: translateY(-3px);
+  transform: scale(1.03);
   background: linear-gradient(135deg, var(--glass-hover), var(--glass-strong));
   border-color: var(--accent);
   color: #fff;
@@ -141,6 +155,33 @@ img {
 
 .button:hover::after {
   animation: shine 0.8s var(--ease);
+}
+
+/* Button über die volle Breite (z. B. in Formularen) */
+.button-block {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* Gesperrter Button (z. B. während eine Anfrage läuft) */
+.button:disabled,
+.button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.button:disabled::after {
+  display: none;
+}
+
+/* <button class="button"> sieht genauso aus wie <a class="button"> */
+button.button {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* Zweiter Button: neutrales, fast farbloses Glas */

@@ -1,0 +1,126 @@
+/*
+ * LaserFlow – anmeldung.css (nur für anmelden.html und registrieren.html)
+ *
+ * Seitenaufbau nach den Wireframes "Login" und "Registrierung" (LaserFlow_Dokumentation.pdf):
+ * Benutzer-Icon, Überschrift, Formular und darunter der Wechsel zur jeweils anderen Seite.
+ * Die Formularfelder selbst kommen aus components.css.
+ */
+
+.auth {
+  position: relative;
+  padding: 72px 0 96px;
+  overflow: hidden;
+}
+
+/* weicher Lichtschein hinter der Karte, damit der Glas-Effekt sichtbar wird */
+.auth::before {
+  content: "";
+  position: absolute;
+  top: 8%;
+  left: calc(50% - 160px); /* nicht per transform zentrieren, die float-Animation überschreibt transform */
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow), transparent 65%);
+  filter: blur(30px);
+  pointer-events: none;
+  animation: float 14s ease-in-out infinite;
+}
+
+/* Karte immer mittig, egal wie breit sie ist */
+.auth > .container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Karte im Glas-Look */
+.auth-card {
+  position: relative;
+  width: min(100%, 440px);
+  padding: 40px 36px 32px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: calc(var(--radius) * 1.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 30px 60px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.auth-card-wide {
+  width: min(100%, 560px);
+}
+
+.auth-head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* Benutzer-Icon über der Überschrift (wie im Wireframe) */
+.auth-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--glass-soft);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 0 0 8px rgba(151, 255, 255, 0.04), 0 0 30px var(--glow);
+}
+
+.auth-head h1 {
+  font-size: 2.3rem;
+  margin: 0 0 6px;
+}
+
+.auth-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Wechsel zur anderen Seite: "Noch kein Konto? Registrieren" */
+.auth-switch {
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* Erfolgsmeldung nach der Registrierung */
+.auth-success {
+  text-align: center;
+}
+
+.auth-success:focus {
+  outline: none;
+}
+
+.auth-success p {
+  color: var(--muted);
+}
+
+.auth-success strong {
+  color: var(--text);
+}
+
+@media (max-width: 520px) {
+  .auth {
+    padding: 40px 0 64px;
+  }
+
+  .auth-card {
+    padding: 32px 22px 26px;
+  }
+
+  .auth-head h1 {
+    font-size: 2rem;
+  }
+}
