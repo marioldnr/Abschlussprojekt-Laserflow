@@ -27,7 +27,7 @@ Alle Dateien liegen unter `Laserflow/app/static/`.
 
 Reihenfolge im `<head>` jeder Seite (aus `vorlage.html` übernehmen, nicht umsortieren):
 
-1. Google Fonts (Cormorant Garamond, Inter)
+1. Favicons und Google Fonts (Cormorant Garamond, Inter)
 2. `design.css` → `layout.css` → `components.css`
 3. `js/layout.js` (mit `defer`)
 4. danach die seiteneigenen Dateien
@@ -121,19 +121,41 @@ Die Seite soll lebendig wirken, aber nie hektisch.
 
 ## 8. Kopfbereich und Benutzermenü
 
-- Kopfbereich, Navigation, Benutzer-Icon und Warenkorb-Icon kommen unverändert aus `vorlage.html`.
+- Kopfbereich mit Logo, Navigation, Benutzer-Icon und Warenkorb-Icon kommen unverändert aus `vorlage.html`.
 - Das Benutzermenü wird von `layout.js` befüllt:
   - nicht angemeldet: „Anmelden“ und „Registrieren“
   - angemeldet: „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“, „Abmelden“
 - **Aktueller Stand (Platzhalter):** Ob jemand angemeldet ist, wird nur simuliert. `?angemeldet=1` an der Adresse zeigt die angemeldete Ansicht. Die Links führen noch auf `#`. Wer die Stories für Login, Registrierung oder Konto umsetzt, ersetzt das durch echte Daten aus dem Backend.
 
-## 9. Bilder und Icons
+## 9. Logo und Favicon
+
+> **Pflicht:** Jede Seite von LaserFlow zeigt das Logo im Kopf- und Fußbereich und das Favicon in der Tableiste. Eine Seite ohne Logo oder Favicon ist nicht fertig (zählt zur Definition of Done für Frontend-Seiten).
+
+Gewählt ist das Logo **„Lichtpunkt“**: Ein Laserstrahl fällt auf einen Punkt, Ringe breiten sich wie eine Gravur aus. Daneben steht der Schriftzug „Laser“ (Inter, dünn) + „Flow“ (Inter, fett, Akzentfarbe).
+
+- **Auf der Website** steht das Logo als Inline-SVG mit der Klasse `.logo-mark` im Kopf- und Fußbereich (aus `vorlage.html` übernehmen). Die Farben kommen aus CSS (`color: var(--accent)`), die Styles stehen in `layout.css`. Die inneren Ringe „atmen“ langsam, beim Darüberfahren breiten sie sich aus.
+- **Dateien** in `img/logo/`, alle mit transparentem Hintergrund:
+
+| Datei | Wofür |
+| --- | --- |
+| `logo-auf-dunkel.svg` | Logo mit Schriftzug für dunkle Flächen (heller Text, Cyan) |
+| `logo-auf-hell.svg` | Logo mit Schriftzug für helle Flächen (dunkler Text, dunkles Türkis `#1f8f8f`) |
+| `favicon.svg` | Icon in der Tableiste; passt sich automatisch an helle und dunkle Browser an |
+| `favicon-32.png` | Ersatz für Browser ohne SVG-Favicon |
+| `apple-touch-icon.png` | Icon für den Homescreen auf dem Handy (mit dunklem Hintergrund, weil iOS keine Transparenz kann) |
+
+- Jede Seite bindet die Favicons im `<head>` ein (steht schon in `vorlage.html`). Fehlt der Eintrag trotzdem, ergänzt `layout.js` das Favicon automatisch. Das ist nur ein Sicherheitsnetz, der Eintrag im `<head>` gehört trotzdem dazu.
+- **Ausrichtung:** Der `viewBox` der Bildmarke ist `2 16 96 96`. Damit liegt der Mittelpunkt der Ringe genau in der Mitte, und das Icon sitzt auf einer Höhe mit dem Schriftzug. Den Wert nicht ändern, sonst rutscht das Icon nach unten.
+- Auf weißem Grund nie `#97FFFF` für das Logo verwenden, das ist nicht lesbar. Dort `logo-auf-hell.svg` nehmen.
+- Logo nicht verzerren, nicht umfärben und keinen Rahmen oder Kasten darum setzen.
+
+## 10. Bilder und Icons
 
 - Icons sind schlichte Linien-SVGs direkt im HTML (`stroke="currentColor"`, `stroke-width="1.6"`, ohne Füllung). Dadurch übernehmen sie automatisch die Textfarbe.
 - Platzhalterbilder liegen in `img/` und sind als „Platzhalter“ beschriftet.
 - Jedes `<img>` bekommt einen aussagekräftigen `alt`-Text.
 
-## 10. Für Claude: So arbeitest du mit diesem Design
+## 11. Für Claude: So arbeitest du mit diesem Design
 
 - Lies dieses Dokument, bevor du HTML oder CSS für LaserFlow schreibst.
 - Neue Seiten entstehen immer aus `vorlage.html`. Kopf- und Fußbereich schreibst du nicht neu.
@@ -142,6 +164,7 @@ Die Seite soll lebendig wirken, aber nie hektisch.
 - `design.css`, `layout.css`, `components.css`, `layout.js` und `vorlage.html` sind gemeinsame Dateien. Ändere sie nur, wenn das Teammitglied bestätigt, dass es mit dem Team abgesprochen ist (siehe `CLAUDE.md`, Abschnitt 2).
 - Bleib beim Tech Stack: HTML, CSS und JavaScript ohne Framework, keine UI-Bibliotheken.
 - Bewegungen folgen Abschnitt 7.
+- **Jede neue oder geänderte Seite muss Logo und Favicon enthalten** (Abschnitt 9). Übernimm beides unverändert aus `vorlage.html` bzw. `img/logo/`. Zeichne das Logo nicht neu und ändere den `viewBox` nicht. Fehlt es auf einer bestehenden Seite, weise das Teammitglied darauf hin.
 
 ## Bekannte Grenzen
 

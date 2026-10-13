@@ -53,28 +53,61 @@ main {
   padding-bottom: 12px;
 }
 
+/* Logo: Bildmarke "Lichtpunkt" (inline-SVG) + Schriftzug in Inter */
 .logo {
   display: inline-flex;
   align-items: center;
-  font-family: var(--font-head);
-  font-weight: var(--head-weight);
-  font-size: 1.7rem;
+  gap: 10px;
   text-decoration: none;
+  color: var(--text);
+}
+
+.logo-mark {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  color: var(--accent);   /* Strahl, Punkt und innere Ringe übernehmen die Akzentfarbe */
+  /* Der viewBox im HTML ist so gewählt, dass der Mittelpunkt der Ringe genau in der Mitte
+     der Bildmarke liegt. So sitzt das Icon auf derselben Höhe wie der Schriftzug.
+     Der Strahl ragt dafür oben über den Rand hinaus, deshalb overflow: visible. */
+  overflow: visible;
+  transform: translateY(-0.04em);  /* Feinkorrektur auf die optische Mitte der Großbuchstaben */
+}
+
+.logo-core {
+  fill: currentColor;
+}
+
+.logo-ring {
+  fill: none;
+  stroke: currentColor;
+  transform-origin: 50px 64px;
+}
+
+.logo-ring-1 { stroke-width: 3;   opacity: 0.75; }
+.logo-ring-2 { stroke-width: 2.5; opacity: 0.45; }
+.logo-ring-3 { stroke-width: 2;   opacity: 0.25; stroke: var(--text); }
+
+/* Ringe "atmen" langsam, beim Darüberfahren breiten sie sich aus wie eine Gravur */
+.logo-ring-1 { animation: ripple 3s ease-in-out infinite; }
+.logo-ring-2 { animation: ripple 3s ease-in-out 0.3s infinite; }
+
+.logo:hover .logo-ring {
+  transform: scale(1.12);
+  transition: transform 0.5s var(--ease);
+}
+
+.logo-text {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 1.55rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .logo-accent {
   color: var(--accent);
-}
-
-/* kleiner pulsierender "Laserpunkt" vor dem Logo */
-.logo-dot {
-  margin-right: 10px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 0 var(--glow);
-  animation: pulse 2.4s infinite;
+  font-weight: 600;
 }
 
 .nav {
@@ -277,9 +310,13 @@ main {
   gap: 18px;
 }
 
-.logo-small {
-  font-size: 1.3rem;
-  color: var(--text);
+.logo-small .logo-mark {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.logo-small .logo-text {
+  font-size: 1.25rem;
 }
 
 .footer-links {

@@ -153,10 +153,9 @@ img {
 .reveal-delay-2 { transition-delay: 0.24s; }
 .reveal-delay-3 { transition-delay: 0.36s; }
 
-@keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 var(--glow); }
-  70%  { box-shadow: 0 0 0 10px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+@keyframes ripple {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
 }
 
 @keyframes engrave {

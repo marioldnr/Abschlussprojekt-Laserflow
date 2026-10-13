@@ -1,6 +1,7 @@
 /*
  * LaserFlow – layout.js (gemeinsames Verhalten für JEDE Seite)
  *
+ * 0. Favicon sicherstellen (Pflicht auf jeder Seite)
  * 1. Kopfbereich beim Scrollen verkleinern
  * 2. Benutzermenü (angemeldet / nicht angemeldet)
  * 3. Elemente mit der Klasse "reveal" beim Scrollen einblenden
@@ -8,6 +9,29 @@
  * Voraussetzung: Die Seite enthält Kopfbereich und Benutzermenü aus vorlage.html.
  * Gemeinsame Datei: Änderungen nur nach Absprache im Team.
  */
+
+/* ---------- 0. Favicon sicherstellen ----------
+ * Eigentlich steht das Favicon schon im <head> jeder Seite (siehe vorlage.html).
+ * Fehlt es doch einmal, ergänzt layout.js es automatisch. So zeigt jede Seite,
+ * die layout.js einbindet, das LaserFlow-Icon in der Tableiste.
+ * Der Pfad wird relativ zu dieser Skriptdatei berechnet, damit es auch in Unterordnern klappt.
+ */
+const scriptUrl = document.currentScript ? document.currentScript.src : window.location.href;
+
+if (!document.querySelector('link[rel="icon"]')) {
+  const icons = [
+    { rel: "icon", type: "image/svg+xml", file: "favicon.svg" },
+    { rel: "icon", type: "image/png", file: "favicon-32.png" },
+    { rel: "apple-touch-icon", file: "apple-touch-icon.png" },
+  ];
+  icons.forEach((icon) => {
+    const link = document.createElement("link");
+    link.rel = icon.rel;
+    if (icon.type) link.type = icon.type;
+    link.href = new URL(`../img/logo/${icon.file}`, scriptUrl).href;
+    document.head.appendChild(link);
+  });
+}
 
 /* ---------- 1. Kopfbereich beim Scrollen ---------- */
 const header = document.getElementById("header");
