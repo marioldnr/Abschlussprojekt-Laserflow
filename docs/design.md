@@ -4,7 +4,7 @@
 > Gilt für Menschen **und** für Claude. Wer eine neue Seite baut oder eine bestehende ändert, hält sich an dieses Dokument.
 > Gemeinsame Datei: Änderungen nur per Pull Request mit Zustimmung des Teams.
 
-Referenz-Umsetzung: `Laserflow/app/static/index.html` (Startseite) und `Laserflow/app/static/vorlage.html` (leere Seite zum Kopieren).
+Referenz-Umsetzung: `frontend/index.html` (Startseite) und `frontend/vorlage.html` (leere Seite zum Kopieren).
 
 ---
 
@@ -14,7 +14,7 @@ Dunkel, edel und ruhig, mit einem leuchtenden Cyan-Akzent wie ein Laserstrahl. S
 
 ## 2. Dateien und wofür sie da sind
 
-Alle Dateien liegen unter `Laserflow/app/static/`.
+Alle Dateien liegen unter `frontend/`.
 
 | Datei | Inhalt | Wer darf ändern |
 | --- | --- | --- |
