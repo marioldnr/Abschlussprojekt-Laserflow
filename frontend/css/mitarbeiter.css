@@ -1,0 +1,421 @@
+/*
+ * LaserFlow – mitarbeiter.css (nur für mitarbeiter.html, US15 "Mitarbeiter verwalten")
+ *
+ * Seitenaufbau nach Wireframe "Mitarbeiter anlegen und bearbeiten" (LaserFlow_Dokumentation.pdf):
+ * Personen-Icon, Überschrift mit Stift, darunter eine Karte mit den Eingabefeldern.
+ * Daneben (auf dem Handy darunter) die Liste der Mitarbeiter mit Rolle und Stift zum Bearbeiten.
+ * Formularfelder und Buttons kommen aus components.css bzw. design.css.
+ */
+
+.staff {
+  position: relative;
+  padding: 72px 0 96px;
+  overflow: hidden;
+}
+
+/* weicher Lichtschein hinter der Karte, damit der Glas-Effekt sichtbar wird (wie auf anmelden.html) */
+.staff::before {
+  content: "";
+  position: absolute;
+  top: 6%;
+  left: calc(50% - 360px);
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow), transparent 65%);
+  filter: blur(30px);
+  pointer-events: none;
+  animation: float 14s ease-in-out infinite;
+}
+
+/* Karte links, Liste rechts */
+.staff-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  justify-content: center;
+  align-items: start;
+  gap: 32px;
+}
+
+.staff-access {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 520px);
+}
+
+/* Linke Spalte: Überschrift über der Karte (Wireframe). scroll-margin: beim Hinscrollen
+   (Stift in der Liste) nicht unter dem festen Kopfbereich verschwinden. */
+.staff-editor {
+  scroll-margin-top: 110px;
+}
+
+/* Karte im Glas-Look */
+.staff-card,
+.staff-list {
+  position: relative;
+  padding: 40px 36px 32px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: calc(var(--radius) * 1.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 30px 60px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Im Bearbeiten-Modus leuchtet der Rand der Karte, damit klar ist, dass ein Account geändert wird */
+.staff-card.is-editing {
+  border-color: var(--glass-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 30px var(--glow),
+    0 30px 60px rgba(0, 0, 0, 0.35);
+}
+
+.staff-head {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* Stift oben rechts in der Karte (Wireframe) */
+.staff-card-pen {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: var(--muted);
+  transition: color 0.3s, transform 0.4s var(--ease);
+}
+
+.staff-card.is-editing .staff-card-pen {
+  color: var(--accent);
+  transform: rotate(-12deg) scale(1.1);
+}
+
+/* Personen-Icon über der Überschrift (wie im Wireframe) */
+.staff-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--glass-soft);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 0 0 8px rgba(151, 255, 255, 0.04), 0 0 30px var(--glow);
+}
+
+.staff-head h1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-size: 2.3rem;
+  margin: 0 0 6px;
+}
+
+/* Stift neben der Überschrift (Wireframe) */
+.staff-title-pen {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.staff-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Auswahlfeld im Stil der Eingabefelder, mit eigenem Pfeil */
+.staff-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 40px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 52%,
+    calc(100% - 15px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.staff-select option {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.staff-actions {
+  margin-top: 6px;
+}
+
+/* Bereich "Account deaktivieren" unter den Buttons, mit Trennlinie abgesetzt */
+.staff-status {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.staff-status-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.staff-toggle {
+  justify-self: start;
+}
+
+/* "Account deaktivieren": Glas-Button wie alle, aber Schrift und Rand in der Fehlerfarbe */
+.staff-toggle.is-deactivate {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.staff-toggle.is-deactivate:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ---------- Liste der Mitarbeiter ---------- */
+
+.staff-list-head {
+  margin-bottom: 18px;
+}
+
+.staff-list-head .eyebrow {
+  margin: 0 0 4px;
+}
+
+.staff-list h2 {
+  margin: 0;
+  font-size: 1.9rem;
+}
+
+/* Kennzahlen: drei kleine Kacheln nebeneinander */
+.staff-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.staff-stat {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.staff-stat dt {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.staff-stat dd {
+  margin: 2px 0 0;
+  font-size: 1.6rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums; /* Ziffern gleich breit, "1" nicht wie "I" */
+  line-height: 1.2;
+  color: var(--text);
+}
+
+/* Suche und Filter */
+.staff-tools {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.staff-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Filter als kleine Glas-Pillen; aktiv = Akzentrand */
+.staff-filter {
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s, background 0.25s, transform 0.3s var(--ease);
+}
+
+.staff-filter:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  transform: scale(1.03);
+}
+
+.staff-filter[aria-pressed="true"] {
+  color: var(--glass-text);
+  background: var(--glass-soft);
+  border-color: var(--glass-border);
+}
+
+.staff-filter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.staff-empty {
+  margin: 0;
+  padding: 18px 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+.staff-items {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Eine Zeile: Initialen, Name/E-Mail, Rolle, Stift */
+.staff-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.3s, transform 0.35s var(--ease), background 0.3s;
+}
+
+.staff-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: rgba(255, 255, 255, 0.035);
+  transform: translateY(-2px);
+}
+
+.staff-item.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--glow);
+}
+
+.staff-item.is-inactive {
+  opacity: 0.6;
+}
+
+.staff-item.is-inactive:hover {
+  opacity: 0.85;
+}
+
+/* Rundes Kürzel aus den Initialen, Admins mit leuchtendem Rand */
+.staff-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.staff-avatar.is-admin {
+  color: var(--accent);
+  background: var(--glass-soft);
+  border-color: var(--glass-border);
+  box-shadow: 0 0 14px var(--glow);
+}
+
+.staff-name {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.staff-mail {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* Rolle als kleine Plakette */
+.staff-role {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.staff-role.is-admin {
+  color: var(--accent);
+  border-color: var(--glass-border);
+}
+
+.staff-role.is-inactive {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--border));
+}
+
+@media (max-width: 960px) {
+  .staff-layout {
+    grid-template-columns: minmax(0, 560px);
+  }
+}
+
+@media (max-width: 520px) {
+  .staff {
+    padding: 40px 0 64px;
+  }
+
+  .staff-card,
+  .staff-list {
+    padding: 32px 22px 26px;
+  }
+
+  .staff-head h1 {
+    font-size: 1.9rem;
+  }
+
+  .staff-item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  /* Rolle rutscht unter den Namen */
+  .staff-item .staff-role {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .staff-item .icon-button {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .staff-stat dd {
+    font-size: 1.35rem;
+  }
+}

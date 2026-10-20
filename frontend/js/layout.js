@@ -68,7 +68,9 @@ const userDropdown = document.getElementById("user-dropdown");
 
 /**
  * Füllt das Benutzermenü.
- * @param {{ first_name?: string, last_name?: string, email?: string } | null} user angemeldeter Kunde oder null
+ * Die Rolle (role) entscheidet nur, ob der Link "Mitarbeiter verwalten" erscheint. Das ist
+ * reine Bequemlichkeit: Geschützt wird die Seite im Backend (403 für Nicht-Admins).
+ * @param {{ role?: string, first_name?: string, last_name?: string, email?: string } | null} user angemeldetes Konto oder null
  */
 function renderUserMenu(user) {
   if (!user) {
@@ -80,10 +82,15 @@ function renderUserMenu(user) {
     return;
   }
 
+  // Nur für Admins (US15). Nur Komfort, der Schutz liegt im Backend.
+  const adminLinks =
+    user.role === "admin" ? '<a href="mitarbeiter.html" role="menuitem">Mitarbeiter verwalten</a>' : "";
+
   userDropdown.innerHTML = `
     <div class="dropdown-head">Angemeldet als <strong data-user-name></strong></div>
     <a href="konto.html" role="menuitem">Mein Konto</a>
     <a href="#" role="menuitem">Meine Bestellungen</a>
+    ${adminLinks}
     <div class="dropdown-divider"></div>
     <a href="#" role="menuitem" data-logout>Abmelden</a>
   `;
