@@ -197,6 +197,15 @@ main {
   position: relative;
 }
 
+/* Profilbild im Benutzer-Icon (setzt layout.js, wenn der Kunde ein Bild hochgeladen hat) */
+.icon-button .user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--glass-border);
+}
+
 /* Menü ist unsichtbar, bis layout.js die Klasse "is-open" setzt */
 .dropdown {
   position: absolute;

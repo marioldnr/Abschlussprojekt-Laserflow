@@ -3,7 +3,7 @@
  *
  * Schnittstelle (Backend: app/accounts/router.py, Details in docs/module/anmeldung.md):
  *
- *   POST /api/auth/register     { email, password, first_name, last_name, street, postal_code, city }
+ *   POST /api/auth/register     { email, password, first_name, last_name, street, house_number, postal_code, city }
  *                               201 angelegt, Code per E-Mail · 409 E-Mail vergeben · 422 ungültige Felder
  *   POST /api/auth/verify       { email, code }
  *                               200 Kundendaten + Sitzungs-Cookie · 400 Code falsch · 409 schon bestätigt
@@ -32,6 +32,11 @@ const FIELD_NAMES = {
   first_name: "firstName",
   last_name: "lastName",
   postal_code: "postalCode",
+  house_number: "houseNumber",
+  // Mein Konto (US10)
+  current_password: "currentPassword",
+  new_password: "newPassword",
+  new_email: "newEmail",
 };
 
 /**
@@ -78,7 +83,7 @@ export async function login({ email, password }) {
 /**
  * Registriert einen neuen Kunden. Danach verschickt das Backend den Bestätigungscode.
  * @param {{ email: string, password: string, firstName: string, lastName: string,
- *           street: string, postalCode: string, city: string }} data
+ *           street: string, houseNumber: string, postalCode: string, city: string }} data
  * @returns {Promise<object>}
  * @throws {ApiError} Status 409 (E-Mail vergeben) oder 422 (Feldfehler, siehe fieldErrorsFromApi)
  */
@@ -92,6 +97,7 @@ export async function register(data) {
         first_name: data.firstName.trim(),
         last_name: data.lastName.trim(),
         street: data.street.trim(),
+        house_number: data.houseNumber.trim(),
         postal_code: data.postalCode.trim(),
         city: data.city.trim(),
       },

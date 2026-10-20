@@ -18,6 +18,15 @@ VERIFICATION_CODE_MAX_ATTEMPTS = 5
 SESSION_COOKIE_NAME = "laserflow_session"
 SESSION_VALID_DAYS = 7
 
+# --- Hochgeladene Dateien ---
+
+# Ordner für hochgeladene Dateien (Profilbilder unter uploads/avatars/). Liegt im Repo-Ordner,
+# gehört aber NICHT in Git (CLAUDE.md, Abschnitt 5). Wird beim ersten Upload angelegt.
+UPLOAD_DIR = "./uploads"
+
+# Profilbild: größte erlaubte Dateigröße (5 MB).
+AVATAR_MAX_BYTES = 5 * 1024 * 1024
+
 # --- E-Mail-Versand (app/mail.py) ---
 
 # "console": E-Mails werden nur im Terminal ausgegeben (zum Entwickeln, kein Mailserver nötig).

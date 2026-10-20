@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   required, email, strongPassword, matchesField, personName,
-  street, postalCode, city, accepted, validateAll, PASSWORD_MIN_LENGTH,
+  streetName, houseNumber, postalCode, city, accepted, validateAll, PASSWORD_MIN_LENGTH,
   verificationCode, VERIFICATION_CODE_LENGTH,
 } from "../js/modules/validation.js";
 
@@ -59,12 +59,26 @@ test("personName: Buchstaben, Bindestrich, Umlaute; keine Ziffern; Längengrenze
   assert.equal(personName("x".repeat(50)), null);
 });
 
-test("street: braucht Straßenname und Hausnummer", () => {
-  for (const value of ["Musterstraße 12", "Am Ring 3a", "Hauptstr. 7", "Lange Gasse 10-12"]) {
-    assert.equal(street(value), null, value);
+test("streetName: nur Buchstaben, Leerzeichen und Bindestrich zwischen Wörtern", () => {
+  for (const value of ["Musterstraße", "Am Ring", "Karl-Marx-Straße", "Schloßallee", "  Ulmenstraße  "]) {
+    assert.equal(streetName(value), null, value);
   }
-  for (const value of ["Musterstraße", "12", "Musterstraße zwölf", ""]) {
-    assert.ok(street(value), value);
+});
+
+test("streetName: keine Zahlen, keine Sonderzeichen, Mindestlänge", () => {
+  for (const value of ["Musterstraße 12", "Hauptstr.", "Am  Ring", "Straße!", "-Ring", "Ring-", "A", "x".repeat(101)]) {
+    assert.ok(streetName(value), value);
+  }
+  // Zahl in der Straße: eigener Hinweis auf das Hausnummer-Feld
+  assert.match(streetName("Musterstraße 12"), /Hausnummer/);
+});
+
+test("houseNumber: Ziffern und höchstens ein Buchstabe", () => {
+  for (const value of ["1", "12", "12a", "1234B", " 7 "]) {
+    assert.equal(houseNumber(value), null, value);
+  }
+  for (const value of ["", "a", "a12", "12ab", "12-14", "12/1", "12 a", "12345", "1.2"]) {
+    assert.ok(houseNumber(value), value);
   }
 });
 

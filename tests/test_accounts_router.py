@@ -29,7 +29,8 @@ REGISTER_BODY = {
     "password": "geheim123",
     "first_name": "Anna",
     "last_name": "Muster",
-    "street": "Musterstraße 12",
+    "street": "Musterstraße",
+    "house_number": "12",
     "postal_code": "12345",
     "city": "Musterstadt",
 }
@@ -116,6 +117,12 @@ def test_register_invalid_fields_give_422_with_field_names(client, sent_mails):
     assert set(fields) == {"password", "postal_code"}
     assert "mindestens 8 Zeichen" in fields["password"]
     assert sent_mails == []
+
+
+def test_register_wrong_house_number_is_reported_at_that_field(client):
+    response = client.post("/api/auth/register", json={**REGISTER_BODY, "house_number": "12-14"})
+    assert response.status_code == 422
+    assert [item["loc"][-1] for item in response.json()["detail"]] == ["house_number"]
 
 
 def test_register_missing_field_gives_422(client):

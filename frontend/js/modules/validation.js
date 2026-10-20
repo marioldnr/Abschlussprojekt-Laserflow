@@ -21,8 +21,12 @@ export const VERIFICATION_CODE_LENGTH = 4;
 // Deutsche Postleitzahl: genau fünf Ziffern.
 const POSTAL_CODE_PATTERN = /^\d{5}$/;
 
-// Straße mit Hausnummer, z. B. "Musterstraße 12" oder "Am Ring 3a".
-const STREET_PATTERN = /^[\p{L}][\p{L}\s.'-]*\s+\d+[a-zA-Z]?(\s*[-/]\s*\d+[a-zA-Z]?)?$/u;
+// Straße ohne Hausnummer: nur Buchstaben. Zwischen Wörtern ist genau ein Leerzeichen
+// oder Bindestrich erlaubt ("Am Ring", "Karl-Marx-Straße"). Keine Ziffern, keine Sonderzeichen.
+const STREET_NAME_PATTERN = /^\p{L}+(?:[ -]\p{L}+)*$/u;
+
+// Hausnummer: 1 bis 4 Ziffern, danach höchstens ein Buchstabe ("12", "12a"). Keine Sonderzeichen.
+const HOUSE_NUMBER_PATTERN = /^\d{1,4}[a-zA-Z]?$/;
 
 // Namen und Orte: Buchstaben, Leerzeichen, Bindestrich, Apostroph, Punkt.
 const NAME_PATTERN = /^[\p{L}][\p{L}\s.'-]*$/u;
@@ -89,14 +93,31 @@ export function personName(value) {
 }
 
 /**
- * Straße mit Hausnummer (Plausibilitätsprüfung der Adresse laut Use Case "Registrieren").
+ * Straßenname ohne Hausnummer: nur Buchstaben, 2 bis 100 Zeichen
+ * (Leerzeichen und Bindestrich zwischen Wörtern erlaubt).
  * @param {string} value
  * @returns {string|null}
  */
-export function street(value) {
-  return STREET_PATTERN.test(String(value).trim())
+export function streetName(value) {
+  const text = String(value).trim();
+  if (/\d/.test(text)) {
+    return "Bitte gib die Hausnummer im Feld daneben ein. Die Straße darf keine Zahlen enthalten.";
+  }
+  if (text.length < 2 || text.length > 100 || !STREET_NAME_PATTERN.test(text)) {
+    return "Die Straße darf nur Buchstaben enthalten (Leerzeichen und Bindestrich sind erlaubt), z. B. Musterstraße.";
+  }
+  return null;
+}
+
+/**
+ * Hausnummer: Ziffern, danach höchstens ein Buchstabe, z. B. 12 oder 12a.
+ * @param {string} value
+ * @returns {string|null}
+ */
+export function houseNumber(value) {
+  return HOUSE_NUMBER_PATTERN.test(String(value).trim())
     ? null
-    : "Bitte gib Straße und Hausnummer an, z. B. Musterstraße 12.";
+    : "Nur Ziffern und höchstens ein Buchstabe, z. B. 12 oder 12a.";
 }
 
 /**
