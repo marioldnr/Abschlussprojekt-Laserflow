@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGB – LaserFlow</title>
+  <meta name="description" content="Allgemeine Geschäftsbedingungen von LaserFlow.">
+
+  <!-- Gemeinsam für jede Seite: Schriften, Design, Layout, Bausteine, Verhalten (siehe docs/design.md) -->
+  <link rel="icon" href="img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="img/logo/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="js/layout.js" defer></script>
+
+  <!-- Nur für diese Seite -->
+  <link rel="stylesheet" href="css/rechtliches.css">
+</head>
+<body>
+
+  <!-- Kopfbereich: wird beim Scrollen kompakter (Klasse "is-scrolled" setzt layout.js) -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-kopf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-kopf)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a href="index.html#ueber-uns">Über uns</a>
+        <a href="index.html#produkte">Produkte</a>
+        <a href="index.html#so-gehts">So funktioniert's</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Benutzer-Icon mit Menü: Inhalt hängt davon ab, ob man angemeldet ist (siehe layout.js) -->
+        <div class="user-menu">
+          <button class="icon-button" id="user-button" aria-haspopup="true" aria-expanded="false" aria-label="Benutzerkonto">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+            </svg>
+          </button>
+          <div class="dropdown" id="user-dropdown" role="menu">
+            <!-- wird von layout.js befüllt -->
+          </div>
+        </div>
+
+        <!-- Warenkorb-Icon mit Anzahl -->
+        <a href="#" class="icon-button cart" aria-label="Warenkorb">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 7h14l-1.5 11a2 2 0 0 1-2 1.7h-7a2 2 0 0 1-2-1.7z"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- AGB (Issue #38). Der Text steht NUR hier. Das Popup auf registrieren.html lädt
+         den Bereich #legal-text aus dieser Seite (js/modules/agb-dialog.js).
+         Wer den Text ändert, ändert ihn also automatisch auch im Popup. -->
+    <section class="section">
+      <div class="container legal">
+        <div class="section-head reveal">
+          <p class="eyebrow">Rechtliches</p>
+          <h2>Allgemeine Geschäftsbedingungen</h2>
+        </div>
+
+        <article class="legal-text" id="legal-text">
+          <p class="alert alert-info">LaserFlow ist eine Demo-Anwendung, die im Rahmen eines Schulprojekts an der Rudolf-Diesel-Fachschule Nürnberg entstanden ist. Über diese Anwendung werden keine echten Verträge geschlossen, keine Zahlungen ausgeführt und keine Waren versendet.</p>
+
+          <h3>§ 1 Anbieter und Geltungsbereich</h3>
+          <p>(1) Anbieter ist LaserFlow, ein Schulprojekt von Marcus, Mario und Sita, Rudolf-Diesel-Fachschule, Äußere Bayreuther Straße 8, 90491 Nürnberg. E-Mail: [noch offen]</p>
+          <p>(2) Diese AGB gelten für alle Bestellungen, die Kunden über die Web-Anwendung LaserFlow aufgeben.</p>
+
+          <h3>§ 2 Kundenkonto</h3>
+          <p>(1) Für das Hochladen von Bildern und für Bestellungen ist ein Kundenkonto erforderlich. Den Produktkatalog können alle Besucher ohne Konto ansehen.</p>
+          <p>(2) Bei der Registrierung gibt der Kunde eine E-Mail-Adresse und ein Passwort an. Das Konto wird erst aktiv, wenn der Kunde den vierstelligen Code aus der Bestätigungs-E-Mail eingegeben hat.</p>
+          <p>(3) Der Kunde hält sein Passwort geheim. Das Passwort wird nur verschlüsselt (als Hash) gespeichert.</p>
+
+          <h3>§ 3 Produkte</h3>
+          <p>(1) LaserFlow bietet Produkte mit Kundenbild an, auf die ein vom Kunden hochgeladenes Bild graviert wird, sowie fertige Produkte, die ohne eigenes Bild bestellt werden.</p>
+          <p>(2) Alle Produkte bestehen aus demselben Material. Holz ist ein Naturprodukt. Abweichungen in Maserung und Farbe sind daher kein Mangel.</p>
+
+          <h3>§ 4 Hochgeladene Bilder</h3>
+          <p>(1) Akzeptiert werden Bilder im Format JPEG oder PNG mit höchstens 5 MB.</p>
+          <p>(2) Der Kunde versichert, dass er die Rechte an dem hochgeladenen Bild besitzt und dass das Bild keine Rechte Dritter verletzt (z. B. Urheberrecht, Persönlichkeitsrecht, Markenrecht).</p>
+          <p>(3) Das Bild wird automatisch aufbereitet: Der Hintergrund wird per KI entfernt, das Motiv wird zugeschnitten, in den Gravurbereich eingepasst, bei Bedarf per KI hochskaliert und anschließend in Graustufen umgewandelt. Das Originalbild bleibt gespeichert, und der Kunde kann jederzeit dazu zurückwechseln.</p>
+          <p>(4) Die KI-Modelle laufen auf dem eigenen Server. Kundenbilder werden nicht an externe Dienste übertragen.</p>
+          <p>(5) Vor der Bestellung sieht der Kunde das aufbereitete Bild in einer Vorschau und bestätigt es. Graviert wird das bestätigte Ergebnis. Abweichungen zwischen Bildschirmvorschau und fertiger Gravur, die durch das Material und das Gravurverfahren entstehen, sind kein Mangel.</p>
+          <p>(6) Bilder, deren Auflösung auch nach dem Hochskalieren nicht ausreicht, werden abgelehnt.</p>
+
+          <h3>§ 5 Vertragsschluss</h3>
+          <p>(1) Die Darstellung der Produkte im Katalog ist noch kein verbindliches Angebot.</p>
+          <p>(2) Der Kunde legt Artikel mit der gewünschten Menge in den Warenkorb und kann die Menge ändern oder Artikel wieder entfernen.</p>
+          <p>(3) Beim Bestellabschluss gibt der Kunde die Lieferadresse ein, wählt eine Zahlungsart und bezahlt. Mit dem Bezahlen gibt der Kunde eine verbindliche Bestellung ab. Die Bestellung erhält dann den Status „eingegangen“.</p>
+          <p>(4) Nach dem Bezahlen erhält der Kunde eine Bestellbestätigung. Die Rechnung wird per E-Mail zugesendet.</p>
+
+          <h3>§ 6 Preise und Zahlung</h3>
+          <p>(1) Der Preis eines Artikels ergibt sich aus dem Basispreis des Produkts multipliziert mit der Menge. Der Gesamtbetrag wird im Warenkorb jederzeit angezeigt.</p>
+          <p>(2) Versandkosten: [noch offen]</p>
+          <p>(3) Als Zahlungsarten stehen PayPal und Banküberweisung zur Auswahl. In dieser Demo-Anwendung wird die Zahlung nur simuliert. Es wird kein externer Zahlungsdienst angebunden, und es fließt kein Geld.</p>
+
+          <h3>§ 7 Lieferung</h3>
+          <p>(1) Die Lieferung erfolgt ausschließlich per Versand an die angegebene Lieferadresse. Eine Abholung ist nicht möglich.</p>
+          <p>(2) Das voraussichtliche Lieferdatum wird beim Bestellabschluss berechnet (Bestelldatum plus feste Produktions- und Versanddauer) und in der Bestellhistorie angezeigt. Genaue Dauer: [noch offen]</p>
+          <p>(3) Der Kunde sieht den aktuellen Stand seiner Bestellung jederzeit in seiner Bestellhistorie. Wenn die Bestellung bearbeitet und wenn sie versendet wird, erhält er jeweils automatisch eine E-Mail.</p>
+
+          <h3>§ 8 Widerrufsrecht</h3>
+          <p>(1) Produkte mit Kundenbild werden nach den Vorgaben des Kunden individuell angefertigt. Für sie besteht nach § 312g Abs. 2 Nr. 1 BGB kein Widerrufsrecht.</p>
+          <p>(2) Für fertige Produkte besteht das gesetzliche Widerrufsrecht von 14 Tagen. Widerrufsbelehrung: [noch offen]</p>
+
+          <h3>§ 9 Gewährleistung</h3>
+          <p>Es gelten die gesetzlichen Gewährleistungsrechte.</p>
+
+          <h3>§ 10 Konto löschen</h3>
+          <p>(1) Der Kunde kann sein Konto jederzeit in seinen persönlichen Daten löschen. Danach wird er abgemeldet, und das Konto wird deaktiviert. Eine erneute Anmeldung ist nicht möglich.</p>
+          <p>(2) Laufende Bestellungen werden trotzdem normal bearbeitet und versendet.</p>
+          <p>(3) Bestell- und Rechnungsbelege bleiben wegen gesetzlicher Aufbewahrungspflichten gespeichert. Alle übrigen personenbezogenen Daten werden anonymisiert, sobald alle laufenden Bestellungen versendet sind.</p>
+
+          <h3>§ 11 Datenschutz</h3>
+          <p>Wie LaserFlow personenbezogene Daten verarbeitet, steht in der Datenschutzerklärung.</p>
+
+          <p class="legal-stand">Stand: Oktober 2026</p>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fußbereich: rechtliche Links und Copyright -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a href="index.html" class="logo logo-small" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-fuss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-fuss)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+      <nav class="footer-links" aria-label="Rechtliches">
+        <a href="#">Impressum</a>
+        <a href="#">Datenschutz</a>
+        <a href="#">AGB</a>
+        <a href="#">Versand</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+      <p>© 2026 LaserFlow – Abschlussprojekt</p>
+    </div>
+  </footer>
+
+</body>
+</html>

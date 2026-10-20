@@ -160,7 +160,7 @@
             <div class="field">
               <label class="checkbox" for="terms">
                 <input id="terms" name="terms" type="checkbox" required aria-describedby="terms-error">
-                <span>Ich akzeptiere die <a class="text-link" href="#">AGB</a> und habe die <a class="text-link" href="#">Datenschutzerklärung</a> gelesen.</span>
+                <span>Ich akzeptiere die <a class="text-link" href="agb.html" target="_blank" rel="noopener" data-agb-open>AGB</a> und habe die <a class="text-link" href="datenschutz.html" target="_blank" rel="noopener" data-agb-open>Datenschutzerklärung</a> gelesen.</span>
               </label>
               <p class="field-error" id="terms-error" hidden></p>
             </div>
@@ -181,6 +181,34 @@
         </div>
       </div>
     </section>
+
+
+    <!-- Popup für Rechtstexte (Issue #38): Links mit data-agb-open öffnen es, siehe js/modules/agb-dialog.js.
+         Der Text steht NICHT hier, sondern wird beim Öffnen aus der verlinkten Seite (z. B. agb.html,
+         Bereich #legal-text) geladen. Ohne JavaScript öffnet der Link die Seite einfach in einem neuen Tab.
+         <dialog> bringt Abdunkeln, Schließen mit Esc und Fokus im Fenster schon vom Browser mit. -->
+    <dialog class="agb-dialog" id="agb-dialog" aria-labelledby="agb-dialog-title">
+      <div class="agb-dialog-head">
+        <h2 id="agb-dialog-title" data-agb-title>Allgemeine Geschäftsbedingungen</h2>
+        <button class="icon-button" type="button" data-agb-close aria-label="Fenster schließen">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="agb-dialog-body">
+        <p data-agb-loading hidden>Text wird geladen …</p>
+        <p class="alert alert-error" data-agb-error hidden>
+          Der Text konnte nicht geladen werden.
+          <a class="text-link" href="agb.html" target="_blank" rel="noopener" data-agb-error-link>In neuem Tab öffnen</a>
+        </p>
+        <!-- hier setzt agb-dialog.js den geladenen Text ein -->
+        <div data-agb-content></div>
+      </div>
+
+      <div class="button-row agb-dialog-foot">
+        <button class="button" type="button" data-agb-close>Gelesen und schließen</button>
+      </div>
+    </dialog>
 
   </main>
 

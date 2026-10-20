@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datenschutz – LaserFlow</title>
+  <meta name="description" content="Datenschutzerklärung von LaserFlow.">
+
+  <!-- Gemeinsam für jede Seite: Schriften, Design, Layout, Bausteine, Verhalten (siehe docs/design.md) -->
+  <link rel="icon" href="img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="img/logo/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="js/layout.js" defer></script>
+
+  <!-- Nur für diese Seite -->
+  <link rel="stylesheet" href="css/rechtliches.css">
+</head>
+<body>
+
+  <!-- Kopfbereich: wird beim Scrollen kompakter (Klasse "is-scrolled" setzt layout.js) -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-kopf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-kopf)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a href="index.html#ueber-uns">Über uns</a>
+        <a href="index.html#produkte">Produkte</a>
+        <a href="index.html#so-gehts">So funktioniert's</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Benutzer-Icon mit Menü: Inhalt hängt davon ab, ob man angemeldet ist (siehe layout.js) -->
+        <div class="user-menu">
+          <button class="icon-button" id="user-button" aria-haspopup="true" aria-expanded="false" aria-label="Benutzerkonto">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+            </svg>
+          </button>
+          <div class="dropdown" id="user-dropdown" role="menu">
+            <!-- wird von layout.js befüllt -->
+          </div>
+        </div>
+
+        <!-- Warenkorb-Icon mit Anzahl -->
+        <a href="#" class="icon-button cart" aria-label="Warenkorb">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 7h14l-1.5 11a2 2 0 0 1-2 1.7h-7a2 2 0 0 1-2-1.7z"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Datenschutzerklärung (Issue #38). Der Text steht NUR hier. Das Popup auf registrieren.html lädt
+         den Bereich #legal-text aus dieser Seite (js/modules/agb-dialog.js).
+         Wer den Text ändert, ändert ihn also automatisch auch im Popup. -->
+    <section class="section">
+      <div class="container legal">
+        <div class="section-head reveal">
+          <p class="eyebrow">Rechtliches</p>
+          <h2>Datenschutzerklärung</h2>
+        </div>
+
+        <article class="legal-text" id="legal-text">
+          <p class="alert alert-info">LaserFlow ist eine Demo-Anwendung, die im Rahmen eines Schulprojekts an der Rudolf-Diesel-Fachschule Nürnberg entstanden ist. Es werden nur Testdaten verarbeitet. Bitte geben Sie keine echten persönlichen Daten ein.</p>
+
+          <h3>1. Verantwortliche</h3>
+          <p>Verantwortlich für die Datenverarbeitung ist LaserFlow, ein Schulprojekt von Marcus, Mario und Sita, Rudolf-Diesel-Fachschule, Äußere Bayreuther Straße 8, 90491 Nürnberg. E-Mail: [noch offen]</p>
+
+          <h3>2. Welche Daten wir verarbeiten</h3>
+          <p>(1) <strong>Kundenkonto:</strong> Vorname, Nachname, E-Mail-Adresse, Adresse (Straße und Hausnummer, PLZ, Ort) und Ihr Passwort. Das Passwort wird nie im Klartext gespeichert, sondern nur als Hash. Für die Bestätigung des Kontos speichern wir außerdem einen vierstelligen Verifizierungscode.</p>
+          <p>(2) <strong>Bestellungen:</strong> bestellte Artikel und Mengen, Liefer- und gegebenenfalls Rechnungsadresse, gewählte Zahlungsart und der Bestellstatus.</p>
+          <p>(3) <strong>Hochgeladene Bilder:</strong> das Originalbild und das daraus aufbereitete Motiv für die Gravur.</p>
+
+          <h3>3. Zwecke und Rechtsgrundlagen</h3>
+          <p>(1) Wir verarbeiten Ihre Daten, um Ihr Kundenkonto zu führen, Bestellungen abzuwickeln, Ihr Motiv für die Gravur aufzubereiten und Sie per E-Mail über den Stand Ihrer Bestellung zu informieren. Rechtsgrundlage ist die Erfüllung des Vertrags (Art. 6 Abs. 1 lit. b DSGVO).</p>
+          <p>(2) Bestell- und Rechnungsbelege bewahren wir auf, weil wir gesetzlich dazu verpflichtet sind (Art. 6 Abs. 1 lit. c DSGVO).</p>
+
+          <h3>4. Verarbeitung auf dem eigenen Server</h3>
+          <p>(1) Die KI-Bildaufbereitung (Hintergrund entfernen, Hochskalieren) läuft auf dem eigenen Server. Ihre Bilder werden nicht an externe Dienste übertragen.</p>
+          <p>(2) E-Mails (Bestätigungscode, Rechnung, Statusmeldungen) werden über einen eigenen Mailserver versendet, nicht über einen Cloud-Dienst.</p>
+          <p>(3) Die Bezahlung wird nur simuliert. Es werden keine Zahlungsdaten an PayPal oder eine Bank übermittelt.</p>
+          <p>(4) Eine Weitergabe Ihrer Daten an Dritte findet nicht statt.</p>
+
+          <h3>5. Schriftarten von Google Fonts</h3>
+          <p>Diese Seiten laden Schriftarten von Servern der Google Ireland Limited. Dabei wird Ihre IP-Adresse an Google übertragen. [noch offen: Hinweis prüfen oder Schriftarten lokal einbinden]</p>
+
+          <h3>6. Speicherdauer</h3>
+          <p>(1) Ihre Kontodaten speichern wir, solange Ihr Konto besteht.</p>
+          <p>(2) Wenn Sie Ihr Konto löschen, wird es sofort deaktiviert und Sie werden abgemeldet. Laufende Bestellungen werden noch bearbeitet und versendet. Sobald alle laufenden Bestellungen versendet sind, werden Ihre übrigen personenbezogenen Daten anonymisiert.</p>
+          <p>(3) Bestell- und Rechnungsbelege bleiben für die Dauer der gesetzlichen Aufbewahrungsfristen gespeichert.</p>
+
+          <h3>7. Ihre Rechte</h3>
+          <p>(1) Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21).</p>
+          <p>(2) Ihre persönlichen Daten können Sie jederzeit in Ihrem Konto ändern, und Sie können Ihr Konto dort selbst löschen.</p>
+          <p>(3) Sie können sich bei einer Datenschutz-Aufsichtsbehörde beschweren, in Bayern beim Bayerischen Landesamt für Datenschutzaufsicht (BayLDA).</p>
+
+          <p class="legal-stand">Stand: Oktober 2026</p>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fußbereich: rechtliche Links und Copyright -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a href="index.html" class="logo logo-small" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-fuss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-fuss)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+      <nav class="footer-links" aria-label="Rechtliches">
+        <a href="#">Impressum</a>
+        <a href="#">Datenschutz</a>
+        <a href="#">AGB</a>
+        <a href="#">Versand</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+      <p>© 2026 LaserFlow – Abschlussprojekt</p>
+    </div>
+  </footer>
+
+</body>
+</html>

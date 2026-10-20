@@ -111,6 +111,77 @@
   color: var(--text);
 }
 
+/* AGB-Popup (registrieren.html, Issue #38)
+ * Das HTML-Element <dialog> ist geschlossen unsichtbar; js/modules/agb-dialog.js öffnet es mit showModal().
+ * Kopf und Fuß bleiben stehen, nur der Text in der Mitte scrollt. */
+.agb-dialog {
+  width: min(92vw, 640px);
+  max-height: 80vh;
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: calc(var(--radius) * 1.6);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* flex nur im geöffneten Zustand, sonst würde es das Ausblenden des Browsers überschreiben */
+.agb-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* abgedunkelter Hintergrund hinter dem Popup (liefert der Browser bei showModal()) */
+.agb-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.agb-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.agb-dialog-head h2 {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: 1.6rem;
+}
+
+.agb-dialog-body {
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+.agb-dialog-body h3 {
+  margin: 20px 0 6px;
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+}
+
+.agb-dialog-body p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+/* "Stand: …" am Ende des geladenen Textes (Klasse kommt aus agb.html) */
+.agb-dialog-body .legal-stand {
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.agb-dialog-foot {
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
 @media (max-width: 520px) {
   .auth {
     padding: 40px 0 64px;
@@ -122,5 +193,16 @@
 
   .auth-head h1 {
     font-size: 2rem;
+  }
+
+  .agb-dialog-head,
+  .agb-dialog-body,
+  .agb-dialog-foot {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .agb-dialog-foot .button {
+    width: 100%;
   }
 }

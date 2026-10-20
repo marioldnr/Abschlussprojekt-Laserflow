@@ -32,6 +32,7 @@ import {
   readValues,
 } from "./modules/form.js";
 import { register } from "./modules/auth-api.js";
+import { initAgbDialog } from "./modules/agb-dialog.js";
 
 /** Prüfregeln pro Feld (Feldnamen = name-Attribute im HTML). */
 const REGISTER_SCHEMA = {
@@ -50,6 +51,7 @@ const form = document.getElementById("register-form");
 const successPanel = document.getElementById("register-success");
 
 initPasswordToggles(form);
+initAgbDialog(); // AGB-Popup (Issue #38)
 enableLiveValidation(form, REGISTER_SCHEMA);
 
 // Wenn das Passwort geändert wird, muss die Bestätigung neu geprüft werden.
