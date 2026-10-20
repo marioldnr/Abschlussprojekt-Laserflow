@@ -3,7 +3,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { safeReturnTarget, getReturnTarget, loginUrlFor, DEFAULT_TARGET } from "../js/modules/navigation.js";
+import { safeReturnTarget, getReturnTarget, loginUrlFor, verifyUrlFor, DEFAULT_TARGET } from "../js/modules/navigation.js";
 
 test("safeReturnTarget: relative Pfade innerhalb von LaserFlow sind erlaubt", () => {
   assert.equal(safeReturnTarget("produkt.html?id=3"), "produkt.html?id=3");
@@ -34,4 +34,19 @@ test("getReturnTarget und loginUrlFor arbeiten zusammen", () => {
   const url = loginUrlFor("produkt.html?id=3");
   assert.equal(url, "anmelden.html?weiter=produkt.html%3Fid%3D3");
   assert.equal(getReturnTarget(url.split("?")[1]), "produkt.html?id=3");
+});
+
+test("verifyUrlFor: E-Mail, Weiterleitungsziel und Zusatzparameter", () => {
+  assert.equal(verifyUrlFor(" a@b.de "), "bestaetigen.html?email=a%40b.de");
+
+  const url = verifyUrlFor("a@b.de", "produkt.html?id=3", { hinweis: "nicht-bestaetigt" });
+  const params = new URLSearchParams(url.split("?")[1]);
+  assert.equal(params.get("email"), "a@b.de");
+  assert.equal(params.get("hinweis"), "nicht-bestaetigt");
+  assert.equal(getReturnTarget(url.split("?")[1]), "produkt.html?id=3");
+});
+
+test("verifyUrlFor: fremdes Weiterleitungsziel wird zur Startseite", () => {
+  const url = verifyUrlFor("a@b.de", "https://boese-seite.de");
+  assert.equal(new URLSearchParams(url.split("?")[1]).get("weiter"), DEFAULT_TARGET);
 });

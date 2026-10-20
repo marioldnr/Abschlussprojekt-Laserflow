@@ -50,3 +50,23 @@ export function loginUrlFor(currentPath) {
   const params = new URLSearchParams({ [RETURN_PARAM]: currentPath });
   return `anmelden.html?${params}`;
 }
+
+/** Name des URL-Parameters mit der E-Mail-Adresse auf der Bestätigungsseite. */
+export const EMAIL_PARAM = "email";
+
+/**
+ * Baut den Link zur Seite "E-Mail bestätigen" (bestaetigen.html).
+ * Das Weiterleitungsziel (?weiter=) wird mitgenommen, damit der Kunde nach dem
+ * Bestätigen dort landet, wo er hinwollte (sonst Startseite).
+ * @param {string} emailAddress Adresse, an die der Code ging
+ * @param {string|null} [returnTarget] Wert von ?weiter= (optional)
+ * @param {Record<string, string>} [extra] weitere Parameter, z. B. { hinweis: "nicht-bestaetigt" }
+ * @returns {string}
+ */
+export function verifyUrlFor(emailAddress, returnTarget = null, extra = {}) {
+  const params = new URLSearchParams({ [EMAIL_PARAM]: emailAddress.trim(), ...extra });
+  if (returnTarget) {
+    params.set(RETURN_PARAM, safeReturnTarget(returnTarget));
+  }
+  return `bestaetigen.html?${params}`;
+}

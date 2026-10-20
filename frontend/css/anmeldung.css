@@ -1,7 +1,8 @@
 /*
- * LaserFlow – anmeldung.css (nur für anmelden.html und registrieren.html)
+ * LaserFlow – anmeldung.css (nur für anmelden.html, registrieren.html und bestaetigen.html)
  *
- * Seitenaufbau nach den Wireframes "Login" und "Registrierung" (LaserFlow_Dokumentation.pdf):
+ * Seitenaufbau nach den Wireframes "Login", "Registrierung" und "Verifizierungsvorgang"
+ * (LaserFlow_Dokumentation.pdf):
  * Benutzer-Icon, Überschrift, Formular und darunter der Wechsel zur jeweils anderen Seite.
  * Die Formularfelder selbst kommen aus components.css.
  */
@@ -109,6 +110,15 @@
 
 .auth-success strong {
   color: var(--text);
+}
+
+/* Eingabefeld für den 4-stelligen Bestätigungscode: groß, mittig, Ziffern mit Abstand */
+.input-code {
+  text-align: center;
+  font-size: 1.6rem;
+  letter-spacing: 0.6em;
+  padding-left: 0.6em; /* gleicht den Abstand nach der letzten Ziffer aus, damit der Code mittig steht */
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 520px) {

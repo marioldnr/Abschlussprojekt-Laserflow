@@ -4,6 +4,7 @@ Tabellen:
     users              Kunden, Mitarbeiter und Admins (Unterschied über die Spalte role)
     verification_codes Bestätigungen der Registrierung (US02)
     addresses          Adressen eines Kunden (Liefer- und Rechnungsadresse)
+    sessions           Anmeldungen (welches Sitzungs-Cookie gehört zu welchem Konto)
 """
 
 from datetime import datetime
@@ -42,14 +43,20 @@ class User(Base):
     # Verbindungen zu anderen Tabellen (keine eigenen Spalten, nur Python-Komfort)
     verification_codes: Mapped[list["VerificationCode"]] = relationship(back_populates="user")
     addresses: Mapped[list["Address"]] = relationship(back_populates="user")
+    sessions: Mapped[list["UserSession"]] = relationship(back_populates="user")
 
 
 class VerificationCode(Base):
     """Bestätigung einer Registrierung (US02).
 
-    Hinweis: Ob per 4-stelligem Code oder per Link bestätigt wird, ist in Story 2 noch
-    offen. Die Spalte ``code`` ist deshalb lang genug für beides (Code oder Link-Token).
-    ``used_at`` ist leer, solange die Bestätigung noch nicht benutzt wurde.
+    Entschieden: Bestätigt wird mit einem 4-stelligen Code, der per E-Mail kommt.
+    Gültig ist immer nur der neueste Code eines Kontos (nach "Code erneut senden"
+    zählt nur noch der neue).
+
+    ``used_at`` ist leer, solange der Code noch nicht benutzt wurde.
+    ``failed_attempts`` zählt Fehleingaben. Nach zu vielen Fehlversuchen
+    (config.VERIFICATION_CODE_MAX_ATTEMPTS) ist der Code gesperrt, damit niemand
+    alle 10.000 Möglichkeiten durchprobieren kann.
     """
 
     __tablename__ = "verification_codes"
@@ -59,6 +66,7 @@ class VerificationCode(Base):
     code: Mapped[str] = mapped_column(String(64), index=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
     used_at: Mapped[datetime | None]
+    failed_attempts: Mapped[int] = mapped_column(default=0)
 
     user: Mapped["User"] = relationship(back_populates="verification_codes")
 
@@ -84,3 +92,26 @@ class Address(Base):
     city: Mapped[str] = mapped_column(String(100))
 
     user: Mapped["User"] = relationship(back_populates="addresses")
+
+
+class UserSession(Base):
+    """Eine Anmeldung (Sitzung) eines Benutzers.
+
+    So funktioniert es: Beim Anmelden wird ein langer Zufallswert (``token``) erzeugt,
+    hier gespeichert und als Cookie an den Browser geschickt. Bei jeder Anfrage schickt
+    der Browser das Cookie mit, und das Backend sucht hier, zu welchem Konto es gehört.
+    Abmelden = Zeile löschen. Nach ``expires_at`` gilt die Sitzung nicht mehr.
+
+    Die Klasse heißt UserSession statt Session, damit sie nicht mit der
+    Datenbank-Session von SQLAlchemy verwechselt wird.
+    """
+
+    __tablename__ = "sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    expires_at: Mapped[datetime]
+
+    user: Mapped["User"] = relationship(back_populates="sessions")

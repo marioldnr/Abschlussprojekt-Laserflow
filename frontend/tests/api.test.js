@@ -5,7 +5,9 @@
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { requestJson, extractErrorMessage, ApiError, UNREACHABLE_MESSAGE } from "../js/modules/api-client.js";
-import { login, register } from "../js/modules/auth-api.js";
+import {
+  login, register, verifyCode, resendCode, getCurrentUser, logout, fieldErrorsFromApi,
+} from "../js/modules/auth-api.js";
 
 const originalFetch = globalThis.fetch;
 afterEach(() => {
@@ -83,4 +85,62 @@ test("register: wandelt Feldnamen ins Backend-Format, 409 = E-Mail vergeben", as
 
   mockFetch(409, { detail: "exists" });
   await assert.rejects(register(data), (error) => error.status === 409 && /bereits registriert/.test(error.message));
+});
+
+test("fieldErrorsFromApi: Backend-Feldnamen werden zu Formular-Feldnamen", () => {
+  const error = new ApiError("x", 422, {
+    detail: [
+      { loc: ["body", "postal_code"], msg: "Bitte gib eine Postleitzahl mit fünf Ziffern ein." },
+      { loc: ["body", "first_name"], msg: "Name falsch" },
+      { loc: ["body", "password"], msg: "Passwort zu kurz" },
+    ],
+  });
+  assert.deepEqual(fieldErrorsFromApi(error), {
+    postalCode: "Bitte gib eine Postleitzahl mit fünf Ziffern ein.",
+    firstName: "Name falsch",
+    password: "Passwort zu kurz",
+  });
+});
+
+test("fieldErrorsFromApi: ohne Feldliste kommt ein leeres Objekt zurück", () => {
+  assert.deepEqual(fieldErrorsFromApi(new ApiError("x", 500, null)), {});
+  assert.deepEqual(fieldErrorsFromApi(new ApiError("x", 400, { detail: "Text" })), {});
+});
+
+test("register: 422 behält die Feldfehler in error.details", async () => {
+  mockFetch(422, { detail: [{ loc: ["body", "email"], msg: "E-Mail ungültig" }] });
+  const data = {
+    email: "a@b.de", password: "geheim123", firstName: "Anna", lastName: "Muster",
+    street: "Musterstraße 1", postalCode: "12345", city: "Musterstadt",
+  };
+  await assert.rejects(register(data), (error) => error.status === 422 && fieldErrorsFromApi(error).email === "E-Mail ungültig");
+});
+
+test("verifyCode: schickt E-Mail und Code, Meldung vom Backend wird durchgereicht", async () => {
+  const calls = mockFetch(200, { id: 1 });
+  await verifyCode({ email: " a@b.de ", code: " 0427 " });
+  assert.equal(calls[0].url, "/api/auth/verify");
+  assert.deepEqual(JSON.parse(calls[0].options.body), { email: "a@b.de", code: "0427" });
+
+  mockFetch(400, { detail: "Der Code ist falsch. Du hast noch 4 Versuche." });
+  await assert.rejects(verifyCode({ email: "a@b.de", code: "1111" }), (error) => error.status === 400 && /noch 4 Versuche/.test(error.message));
+});
+
+test("resendCode und logout: leere Antwort (204) ist ein Erfolg", async () => {
+  // Eigene Attrappe: Eine 204-Antwort darf gar keinen Body haben (auch keinen leeren Text).
+  const urls = [];
+  globalThis.fetch = async (url) => {
+    urls.push(url);
+    return new Response(null, { status: 204 });
+  };
+  assert.equal(await resendCode("a@b.de"), null);
+  assert.equal(await logout(), null);
+  assert.deepEqual(urls, ["/api/auth/resend-code", "/api/auth/logout"]);
+});
+
+test("getCurrentUser: 401 bedeutet nicht angemeldet (null)", async () => {
+  mockFetch(200, { id: 1, first_name: "Anna" });
+  assert.deepEqual(await getCurrentUser(), { id: 1, first_name: "Anna" });
+  mockFetch(401, { detail: "Nicht angemeldet." });
+  assert.equal(await getCurrentUser(), null);
 });
