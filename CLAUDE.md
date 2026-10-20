@@ -19,6 +19,17 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 - **Tests:** laufen mit `pytest`.
 - **Sprache:** Kommentare, Docstrings, Doku, Commit-Nachrichten und Erklärungen auf Deutsch; Variablen-, Funktions- und Dateinamen auf Englisch.
 
+### Datenbank
+
+- **Aufbau:** eine SQLite-Datei `laserflow.db` (nicht in Git). Pfad in `app/config.py`, Verbindung in `app/database.py` (`engine`, `SessionLocal`, `Base`, `get_db`, `init_db`).
+- **Tabellen liegen im Fachmodul** in `models.py`, keine zentrale Models-Datei: `accounts` (users, verification_codes, addresses), `catalog` (products, product_images), `images` (customer_images), `orders` (cart_items, orders, order_items), `production` (production_jobs, production_files).
+- **Darauf aufbauen** (z. B. Registrieren): im Fachmodul `router.py` (Endpunkt, Session über `Depends(get_db)`) und `service.py` (Logik) anlegen und die vorhandenen Models importieren. Router in `app/main.py` **vor** `app.mount("/", …)` einbinden.
+- **Tabellen ändern:** Models sind gemeinsame Dateien (Abschnitt 2), also vorher im Team absprechen, eigener PR. Es gibt keine Migrationen: `create_all` ändert bestehende Tabellen nicht, nach einer Änderung lokal `laserflow.db` löschen.
+- **Neues Fachmodul mit Tabellen:** Import in `init_db()` ergänzen, sonst wird die Tabelle nicht angelegt.
+- **Feste Entscheidungen, nicht „reparieren“:** Preise in Cent (`int`), Maße in mm, nur Dateipfade in der DB, Löschen nur per Flag (`is_active`, `is_hidden`, `anonymized_at`), Adresse und Stückpreis werden in die Bestellung kopiert, Straße mit Hausnummer in einem Feld und PLZ als `postal_code` (wie im Registrierungsformular), Status-Werte als Text (erlaubte Werte im Docstring, Prüfung im Service). Fremdschlüssel über Tabellennamen, z. B. `ForeignKey("users.id")`.
+- **Tests:** Die Fixture `db` aus `tests/conftest.py` liefert pro Test eine leere Datenbank im Arbeitsspeicher. Tests laufen nie gegen `laserflow.db`.
+- **Offen:** US02 Bestätigung per Code oder Link (Spalte `code` passt für beides). Es gibt noch keine `.gitignore`, deshalb `laserflow.db` und `__pycache__/` nie committen und gezielt `git add` nutzen.
+
 ### Wie wir arbeiten: Scrumban (nach dem RDF-Leitfaden)
 
 Scrumban = Scrum (Rollen, Events, Artefakte) + Kanban (Board, WIP-Limit). Daran orientierst du dich bei jeder Aufgabe.
