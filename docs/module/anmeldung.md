@@ -27,6 +27,10 @@ Besucher legen ein Kundenkonto an (Registrieren), bestätigen ihre E-Mail-Adress
 | `frontend/js/modules/auth-api.js` | Aufrufe unter `/api/auth/...`, Feldfehler des Backends übersetzen |
 | `frontend/js/modules/navigation.js` | sichere Weiterleitung, Link zur Bestätigungsseite |
 | `frontend/js/layout.js` (Abschnitt 2) | Benutzermenü fragt `GET /api/auth/me`, „Abmelden“ |
+| `frontend/agb.html` | AGB als eigene Seite; der Text steht nur hier (`#legal-text`) |
+| `frontend/datenschutz.html` | Datenschutzerklärung als eigene Seite; der Text steht nur hier (`#legal-text`) |
+| `frontend/css/rechtliches.css` | Aussehen der Seiten mit Rechtstexten |
+| `frontend/js/modules/agb-dialog.js` | Popup für AGB und Datenschutz auf `registrieren.html`, lädt den Text aus der verlinkten Seite |
 | `frontend/tests/*.test.js` | Tests der Module |
 
 **Backend** (Router → Service → Models)
@@ -49,7 +53,8 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 
 **Registrieren**
 
-1. Eingaben werden im Browser geprüft: Pflichtfelder, E-Mail-Format, Name, Adresse auf Plausibilität (Straße nur aus Buchstaben, Hausnummer aus Ziffern und höchstens einem Buchstaben, PLZ mit 5 Ziffern, Ort), Passwortstärke, Übereinstimmung der Passwörter, Zustimmung zu AGB und Datenschutz. Fehler: Feld rot, Meldung darunter (z. B. „Das Passwort muss mindestens einen Buchstaben und eine Ziffer enthalten.“).
+1. Eingaben werden im Browser geprüft: Pflichtfelder, E-Mail-Format, Name, Adresse auf Plausibilität (Straße mit Hausnummer, PLZ mit 5 Ziffern, Ort), Passwortstärke, Übereinstimmung der Passwörter, Zustimmung zu AGB und Datenschutz. Fehler: Feld rot, Meldung darunter (z. B. „Das Passwort muss mindestens einen Buchstaben und eine Ziffer enthalten.“).
+   - Die Links „AGB“ und „Datenschutzerklärung“ in der Checkbox öffnen ein Popup mit dem jeweiligen Text (siehe „AGB und Datenschutz (Popup)“ unten). Das Schließen hakt die Checkbox nicht an.
 2. `POST /api/auth/register`: Das Backend prüft alles noch einmal (`validation.py`), schreibt die E-Mail klein, legt das Konto (noch nicht bestätigt) und die Adresse als Lieferadresse an, speichert das Passwort als scrypt-Hash und schickt einen 4-stelligen Code per E-Mail.
 3. Fehler vom Backend erscheinen ebenfalls am Feld: E-Mail schon vergeben (409) bzw. Feldfehler (422).
 4. Erfolg: Weiter zu `bestaetigen.html?email=...`.
@@ -75,6 +80,20 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 
 - `layout.js` fragt auf jeder Seite `GET /api/auth/me`. Antwortet das Backend mit Kundendaten, zeigt das Benutzermenü „Angemeldet als Vorname Nachname“.
 - „Abmelden“ ruft `POST /api/auth/logout` auf (Sitzung gelöscht, Cookie entfernt) und führt zur Startseite.
+
+**AGB und Datenschutz (Popup)** (Issue #38)
+
+1. Die Links in der Checkbox zeigen auf `agb.html` bzw. `datenschutz.html` und haben das Merkmal `data-agb-open`.
+2. Klick: `agb-dialog.js` verhindert das Öffnen des neuen Tabs, öffnet das `<dialog>` mit `showModal()` und zeigt kurz „Text wird geladen …“.
+3. Die Seite aus dem `href` wird per `fetch` geladen. Übernommen werden nur der Bereich `#legal-text` und die Überschrift (`.section-head h2`).
+4. Jede Seite wird pro Seitenaufruf nur einmal geladen (Zwischenspeicher); beim nächsten Öffnen ist der Text sofort da.
+5. Fehler beim Laden: Hinweis mit Link „In neuem Tab öffnen“; beim nächsten Öffnen wird neu geladen.
+6. Schließen per ✕, „Gelesen und schließen“, Esc oder Klick auf den abgedunkelten Hintergrund.
+7. Ohne JavaScript öffnen die Links die Seite einfach in einem neuen Tab (`target="_blank"`).
+
+Der Footer jeder Seite verlinkt „AGB“ und „Datenschutz“ direkt auf `agb.html` bzw. `datenschutz.html` (Issue #50). Neue Seiten bekommen die Links automatisch über `vorlage.html`.
+
+Weiteren Rechtstext anbinden: Seite aus `agb.html` kopieren, Text in `<article id="legal-text">` schreiben, Link mit `href="<seite>.html" target="_blank" rel="noopener" data-agb-open` setzen. Am JavaScript ändert sich nichts.
 
 ## Schnittstelle zum Backend (Vertrag)
 
@@ -106,12 +125,26 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - **`?weiter=` nur mit relativen Pfaden:** schützt vor Weiterleitungen auf fremde Seiten (Open Redirect), siehe `safeReturnTarget()`.
 - **Fehler verschwinden erst beim Tippen, nicht beim Verlassen des Feldes:** Sonst rutscht der Absende-Button beim Klick nach oben und der Klick geht ins Leere.
 
+- **AGB/Datenschutz als eigene Seiten plus Popup (Mischform):** Der Text steht nur einmal (in `agb.html` bzw. `datenschutz.html`) und ist auch direkt verlinkbar. Das Popup lädt ihn nach, damit das ausgefüllte Registrierungsformular erhalten bleibt.
+- **`fetch` direkt in `agb-dialog.js`, nicht über `api-client.js`:** Geladen wird eine eigene HTML-Seite, keine Backend-Schnittstelle (`/api/...`).
+- **`<dialog>` mit `showModal()`:** Abdunkeln, Esc und Fokus im Fenster liefert der Browser, dadurch wenig eigener Code.
+- **Checkbox wird nicht automatisch angehakt:** Die Zustimmung muss eine aktive Handlung des Kunden sein.
+- **AGB-/Datenschutz-Inhalt nur aus den Stories abgeleitet:** Noch nicht entschiedene Punkte stehen sichtbar als „[noch offen]“ im Text (Kontakt-E-Mail, Versandkosten, Lieferdauer, Widerrufsbelehrung, Google-Fonts-Hinweis).
+
 ## Testen
 
 - Backend: im Repo-Ordner `pytest`. Die Endpunkt-Tests (`test_accounts_router.py`) brauchen `httpx` (`pip install httpx`), sonst werden sie übersprungen.
 - Frontend-Module: im Ordner `frontend/` `npm test` (Node.js ab Version 20, keine Pakete nötig).
 - Von Hand: `uvicorn app.main:app --reload` starten, `http://127.0.0.1:8000/registrieren.html` öffnen, registrieren, den Code aus dem Terminal abschreiben. Über Live Server funktioniert nur die Prüfung im Browser („Der Server ist gerade nicht erreichbar“).
 - Nach der Änderung an den Tabellen einmal `laserflow.db` löschen, sonst fehlen die neue Tabelle `sessions` und die Spalte `failed_attempts`.
+- AGB-/Datenschutz-Popup: automatische Tests in `frontend/tests/agb-dialog.test.js` (mit Ersatz-Elementen, weil Node keinen Browser hat). Zusätzlich von Hand im Browser:
+  1. „AGB“ anklicken: Popup öffnet, Überschrift und Text stimmen.
+  2. Schließen und erneut öffnen: Text ist sofort da.
+  3. Danach „Datenschutzerklärung“: Überschrift und Text wechseln.
+  4. ✕, „Gelesen und schließen“, Esc, Klick daneben: Popup schließt jeweils.
+  5. Checkbox ist danach nicht angehakt.
+  6. Schmales Fenster (Handy): Button über volle Breite, nur der Text scrollt.
+  7. `agb.html` und `datenschutz.html` direkt aufrufen: Seiten im LaserFlow-Design.
 
 ## Bekannte Grenzen
 
@@ -120,6 +153,7 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - Abgelaufene Sitzungen werden erst gelöscht, wenn jemand sie benutzt.
 - Wer sich mit einer falschen E-Mail-Adresse registriert, kann sie nicht ändern, sondern muss sich neu registrieren; das falsche, unbestätigte Konto bleibt bestehen.
 - „Passwort vergessen“ ist in den Use Cases nicht vorgesehen und deshalb nicht umgesetzt.
-- Durch die strengen Adressregeln gehen manche echten Adressen nicht: Abkürzungen mit Punkt („Hauptstr.“ → „Hauptstraße“ ausschreiben), Straßen mit Zahl im Namen („Straße des 17. Juni“) und Hausnummern wie „10-12“ oder „12/1“.
-- „Meine Bestellungen“ im Benutzermenü und die Links zu AGB/Datenschutz führen noch auf `#`. „Mein Konto“ führt auf `konto.html` (siehe `docs/module/konto.md`).
+- Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü führen noch auf `#`.
 - Der Warenkorb-Zähler im Kopfbereich weiß noch nichts von der Anmeldung.
+- In AGB und Datenschutzerklärung sind einige Punkte noch „[noch offen]“ (siehe „Bewusste Entscheidungen“).
+- Die Seiten laden Schriften von Google Fonts; die IP-Adresse geht dabei an Google. Das steht in der Datenschutzerklärung; ob die Schriften lokal eingebunden werden, entscheidet das Team.
