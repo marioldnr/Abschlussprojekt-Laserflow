@@ -121,5 +121,5 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - Wer sich mit einer falschen E-Mail-Adresse registriert, kann sie nicht ändern, sondern muss sich neu registrieren; das falsche, unbestätigte Konto bleibt bestehen.
 - „Passwort vergessen“ ist in den Use Cases nicht vorgesehen und deshalb nicht umgesetzt.
 - Durch die strengen Adressregeln gehen manche echten Adressen nicht: Abkürzungen mit Punkt („Hauptstr.“ → „Hauptstraße“ ausschreiben), Straßen mit Zahl im Namen („Straße des 17. Juni“) und Hausnummern wie „10-12“ oder „12/1“.
-- Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü und zu AGB/Datenschutz führen noch auf `#`.
+- „Meine Bestellungen“ im Benutzermenü und die Links zu AGB/Datenschutz führen noch auf `#`. „Mein Konto“ führt auf `konto.html` (siehe `docs/module/konto.md`).
 - Der Warenkorb-Zähler im Kopfbereich weiß noch nichts von der Anmeldung.

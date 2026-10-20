@@ -24,6 +24,12 @@ class User(Base):
         - Konten werden nicht gelöscht, sondern deaktiviert (``is_active``) bzw.
           anonymisiert (``anonymized_at``, US10), damit alte Bestellungen erhalten bleiben.
         - Das Passwort wird nie im Klartext gespeichert, nur als Hash.
+        - "Konto löschen" (US10) setzt ``is_active = False``. Sobald keine Bestellung mehr
+          läuft, werden die persönlichen Daten anonymisiert (``anonymized_at``), die Zeile
+          selbst bleibt für die Bestellbelege (siehe account_service.delete_account).
+        - ``avatar_path``: Pfad zum Profilbild im Dateisystem (das Bild selbst liegt nicht in der DB).
+        - ``pending_email``: neue E-Mail-Adresse, die noch per Code bestätigt werden muss.
+          Bis dahin gilt weiter ``email``.
     """
 
     __tablename__ = "users"
@@ -39,6 +45,8 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
     anonymized_at: Mapped[datetime | None]
     created_at: Mapped[datetime] = mapped_column(default=datetime.now)
+    avatar_path: Mapped[str | None] = mapped_column(String(500))
+    pending_email: Mapped[str | None] = mapped_column(String(255))
 
     # Verbindungen zu anderen Tabellen (keine eigenen Spalten, nur Python-Komfort)
     verification_codes: Mapped[list["VerificationCode"]] = relationship(back_populates="user")
@@ -47,7 +55,8 @@ class User(Base):
 
 
 class VerificationCode(Base):
-    """Bestätigung einer Registrierung (US02).
+    """Bestätigungscode per E-Mail: bei der Registrierung (US02) und beim Ändern der
+    E-Mail-Adresse (US10, dann geht der Code an ``User.pending_email``).
 
     Entschieden: Bestätigt wird mit einem 4-stelligen Code, der per E-Mail kommt.
     Gültig ist immer nur der neueste Code eines Kontos (nach "Code erneut senden"

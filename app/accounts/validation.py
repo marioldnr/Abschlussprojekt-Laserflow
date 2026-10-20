@@ -107,19 +107,31 @@ REGISTRATION_RULES = {
 }
 
 
-def validate_registration(data: dict[str, str]) -> dict[str, str]:
-    """Prüft alle Felder der Registrierung.
+# Felder, die man auf "Mein Konto" ändern kann (US10): wie bei der Registrierung,
+# nur ohne E-Mail und Passwort (dafür gibt es eigene Abläufe).
+PROFILE_RULES = {field: REGISTRATION_RULES[field] for field in
+                 ("first_name", "last_name", "street", "house_number", "postal_code", "city")}
+
+
+def validate_fields(data: dict[str, str], rules: dict) -> dict[str, str]:
+    """Prüft Felder nach einer Regel-Liste. Leere Felder ergeben "Bitte fülle dieses Feld aus.".
 
     Args:
-        data: Feldname → eingegebener Wert, z. B. {"email": "...", "password": "..."}.
+        data: Feldname → eingegebener Wert.
+        rules: Feldname → Prüffunktion (z. B. REGISTRATION_RULES).
 
     Returns:
         Feldname → Fehlermeldung. Leeres Dictionary, wenn alles gültig ist.
     """
     errors = {}
-    for field, rule in REGISTRATION_RULES.items():
-        value = data.get(field, "")
+    for field, rule in rules.items():
+        value = data.get(field) or ""
         message = "Bitte fülle dieses Feld aus." if not value.strip() else rule(value)
         if message:
             errors[field] = message
     return errors
+
+
+def validate_registration(data: dict[str, str]) -> dict[str, str]:
+    """Prüft alle Felder der Registrierung (siehe validate_fields)."""
+    return validate_fields(data, REGISTRATION_RULES)

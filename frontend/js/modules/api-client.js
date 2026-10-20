@@ -52,17 +52,29 @@ export function extractErrorMessage(body) {
 /**
  * Schickt eine JSON-Anfrage an das Backend.
  * @param {string} path Pfad ab API_BASE, z. B. "/auth/login"
- * @param {{ method?: string, body?: object }} [options]
+ * @param {{ method?: string, body?: object, file?: Blob }} [options]
+ *   body: wird als JSON geschickt · file: wird unverändert geschickt (z. B. ein Bild),
+ *   mit dem Dateityp als Content-Type. Nur eins von beiden angeben.
  * @returns {Promise<*>} die JSON-Antwort des Servers (oder null bei leerer Antwort)
  * @throws {ApiError} bei Fehlerstatus oder wenn der Server nicht erreichbar ist
  */
-export async function requestJson(path, { method = "GET", body } = {}) {
+export async function requestJson(path, { method = "GET", body, file } = {}) {
+  const headers = { Accept: "application/json" };
+  let payload;
+  if (file) {
+    headers["Content-Type"] = file.type || "application/octet-stream";
+    payload = file;
+  } else if (body) {
+    headers["Content-Type"] = "application/json";
+    payload = JSON.stringify(body);
+  }
+
   let response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       method,
-      headers: body ? { "Content-Type": "application/json", Accept: "application/json" } : { Accept: "application/json" },
-      body: body ? JSON.stringify(body) : undefined,
+      headers,
+      body: payload,
       credentials: "same-origin", // Sitzungs-Cookie des Backends mitschicken
     });
   } catch {

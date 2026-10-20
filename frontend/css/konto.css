@@ -1,0 +1,278 @@
+/*
+ * LaserFlow – konto.css (nur für konto.html, "Mein Konto", US10)
+ *
+ * Aufbau nach Wireframe "Persönliche Daten verwalten": rundes Profilbild oben,
+ * darunter Karten im Glas-Look mit Stift-Knopf zum Bearbeiten.
+ * Formularfelder und Hinweise kommen aus components.css, Buttons aus design.css.
+ */
+
+.konto {
+  padding-top: 64px;
+}
+
+/* ---------- Kopf: Profilbild + Begrüßung ---------- */
+
+.konto-head {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  margin-bottom: 32px;
+}
+
+.konto-avatar-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Rundes Profilbild. object-fit: cover schneidet jedes Bild quadratisch zu. */
+.konto-avatar {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: var(--glass-soft);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 0 0 8px rgba(151, 255, 255, 0.04), 0 0 30px var(--glow);
+}
+
+.konto-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.konto-avatar-field {
+  justify-items: center;
+  text-align: center;
+}
+
+.konto-avatar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Kleinere Glas-Buttons für Nebenaktionen */
+.konto-small-button {
+  padding: 8px 14px;
+  font: inherit; /* <button> und <label> sollen gleich aussehen */
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.konto-title {
+  margin: 4px 0 6px;
+  font-size: 2.6rem;
+}
+
+.konto-muted,
+.konto-hint {
+  color: var(--muted);
+  margin: 0;
+}
+
+.konto-hint {
+  font-size: 0.82rem;
+}
+
+/* Datei-Auswahl unsichtbar, aber für Tastatur und Screenreader erreichbar.
+ * Bedient wird sie über das Label "Bild ändern". */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.konto-avatar-field:focus-within .konto-avatar-actions label {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#konto-alert {
+  margin-bottom: 20px;
+}
+
+/* ---------- Karten ---------- */
+
+/* Zwei Spalten, Karten einer Reihe sind immer gleich hoch (stretch),
+ * damit nichts versetzt wirkt, auch wenn eine Karte weniger Inhalt hat. */
+.konto-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.konto-card {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 28px 26px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 48px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.konto-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px; /* so hoch wie der Stift-Knopf, damit alle Überschriften auf einer Linie stehen */
+  margin-bottom: 14px;
+}
+
+.konto-card-head h2 {
+  margin: 0;
+  font-size: 1.7rem;
+}
+
+.konto-card-head .icon-button {
+  color: var(--accent);
+}
+
+.konto-value {
+  margin: 0;
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+/* Liste der Daten in der Ansicht (Name, Adresse) */
+.konto-data {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.konto-data dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.konto-data dd {
+  margin: 2px 0 0;
+  white-space: pre-line; /* Zeilenumbruch zwischen Straße und PLZ/Ort */
+}
+
+/* Straße breit, Hausnummer schmal */
+.konto-row-street {
+  grid-template-columns: 1.5fr 0.5fr;
+}
+
+.konto-buttons {
+  margin-top: 4px;
+}
+
+/* Eingabefeld für den 4-stelligen Code (wie auf bestaetigen.html) */
+.input-code {
+  text-align: center;
+  font-size: 1.6rem;
+  letter-spacing: 0.6em;
+  padding-left: 0.6em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Konto löschen ---------- */
+
+.konto-card-danger {
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+
+.konto-card-danger > .konto-muted {
+  margin-bottom: 18px;
+}
+
+/* Button sitzt unten in der Karte, auf gleicher Höhe wie der Inhalt der Nachbarkarte */
+.konto-card-action {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* ---------- Bestätigungsfenster "Konto löschen" ---------- */
+
+.konto-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 30px 30px 26px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* abgedunkelter, weichgezeichneter Hintergrund hinter dem Fenster */
+.konto-dialog::backdrop {
+  background: rgba(10, 9, 8, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.konto-dialog h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.konto-dialog-list {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+
+/* Glas-Button mit Warnfarbe (kein gefüllter Button, siehe docs/design.md Abschnitt 4) */
+.button-danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+.button-danger:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.konto-deleted {
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.konto-deleted:focus {
+  outline: none;
+}
+
+@media (max-width: 860px) {
+  .konto-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .konto-head {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .konto-card {
+    padding: 22px 18px;
+  }
+}

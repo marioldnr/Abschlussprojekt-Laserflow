@@ -33,6 +33,10 @@ const FIELD_NAMES = {
   last_name: "lastName",
   postal_code: "postalCode",
   house_number: "houseNumber",
+  // Mein Konto (US10)
+  current_password: "currentPassword",
+  new_password: "newPassword",
+  new_email: "newEmail",
 };
 
 /**

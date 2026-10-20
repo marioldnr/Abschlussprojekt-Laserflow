@@ -46,8 +46,8 @@ class AccountError(Exception):
         self.detail = detail
 
 
-class RegistrationInvalidError(AccountError):
-    """Eingaben bei der Registrierung sind ungültig (422).
+class FieldValidationError(AccountError):
+    """Eingaben in einem Formular sind ungültig (422).
 
     ``detail`` hat dasselbe Format wie die Fehler, die FastAPI selbst erzeugt:
     [{"loc": ["body", "<feld>"], "msg": "<meldung>"}, ...]. So kann das Frontend
@@ -59,6 +59,10 @@ class RegistrationInvalidError(AccountError):
     def __init__(self, errors: dict[str, str]):
         super().__init__([{"loc": ["body", field], "msg": message} for field, message in errors.items()])
         self.errors = errors
+
+
+class RegistrationInvalidError(FieldValidationError):
+    """Eingaben bei der Registrierung sind ungültig (422)."""
 
 
 class EmailAlreadyRegisteredError(AccountError):
@@ -193,8 +197,15 @@ def _verification_mail_text(first_name: str | None, code: str) -> str:
     )
 
 
-def _create_and_send_code(db: Session, user: User) -> str:
+def create_and_send_code(db: Session, user: User, to: str | None = None, mail_text=None) -> str:
     """Speichert einen neuen Code für das Konto und schickt ihn per E-Mail.
+
+    Args:
+        db: Datenbank-Session.
+        user: das Konto, zu dem der Code gehört.
+        to: Empfänger. Standard: die E-Mail des Kontos. Beim Ändern der E-Mail (US10)
+            geht der Code an die neue Adresse.
+        mail_text: Funktion (Vorname, Code) → Text. Standard: Text für die Registrierung.
 
     Returns:
         der erzeugte Code (wird z. B. in Tests gebraucht).
@@ -202,9 +213,9 @@ def _create_and_send_code(db: Session, user: User) -> str:
     code = _generate_code()
     db.add(VerificationCode(user=user, code=code))
     db.commit()
-    send_mail(user.email, "Dein LaserFlow-Bestätigungscode", _verification_mail_text(user.first_name, code))
+    text = (mail_text or _verification_mail_text)(user.first_name, code)
+    send_mail(to or user.email, "Dein LaserFlow-Bestätigungscode", text)
     return code
-
 
 def _latest_code(db: Session, user: User) -> VerificationCode | None:
     """Der neueste Code eines Kontos. Nur dieser gilt."""
@@ -263,7 +274,7 @@ def register_user(db: Session, data: RegisterRequest) -> User:
         db.rollback()
         raise EmailAlreadyRegisteredError(MSG_EMAIL_TAKEN) from None
 
-    _create_and_send_code(db, user)  # speichert (commit) und verschickt die E-Mail
+    create_and_send_code(db, user)  # speichert (commit) und verschickt die E-Mail
     return user
 
 
@@ -294,6 +305,24 @@ def verify_code(db: Session, email: str, code: str) -> User:
     if user.is_verified:
         raise AlreadyVerifiedError(MSG_ALREADY_VERIFIED)
 
+    check_and_use_code(db, user, code)
+    user.is_verified = True
+    db.commit()
+    return user
+
+
+def check_and_use_code(db: Session, user: User, code: str) -> None:
+    """Prüft einen Bestätigungscode und markiert ihn bei Erfolg als benutzt.
+
+    Gemeinsame Prüfung für die Registrierung (US02) und das Ändern der E-Mail (US10).
+    Speichert (commit) nur die Fehlversuche; was nach einem richtigen Code passiert,
+    entscheidet die aufrufende Funktion und speichert es selbst.
+
+    Raises:
+        CodeExpiredError: kein gültiger Code (abgelaufen, schon benutzt oder nie angefordert).
+        TooManyAttemptsError: zu viele Fehlversuche mit diesem Code.
+        CodeInvalidError: Code falsch, mit Anzahl der restlichen Versuche.
+    """
     latest = _latest_code(db, user)
     if latest is None or latest.used_at is not None:
         raise CodeExpiredError(MSG_CODE_EXPIRED)
@@ -313,10 +342,6 @@ def verify_code(db: Session, email: str, code: str) -> User:
         raise CodeInvalidError(f"{MSG_CODE_WRONG} Du hast noch {remaining} {word}.")
 
     latest.used_at = datetime.now()
-    user.is_verified = True
-    db.commit()
-    return user
-
 
 def resend_code(db: Session, email: str) -> None:
     """Schickt einen neuen Code. Danach gilt nur noch der neue.
@@ -326,7 +351,7 @@ def resend_code(db: Session, email: str) -> None:
     """
     user = get_user_by_email(db, email)
     if user is not None and not user.is_verified and user.is_active:
-        _create_and_send_code(db, user)
+        create_and_send_code(db, user)
 
 
 # --------------------------------------------------------------------------- 3. Anmelden

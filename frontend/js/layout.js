@@ -82,9 +82,8 @@ function renderUserMenu(user) {
 
   userDropdown.innerHTML = `
     <div class="dropdown-head">Angemeldet als <strong data-user-name></strong></div>
-    <a href="#" role="menuitem">Mein Konto</a>
+    <a href="konto.html" role="menuitem">Mein Konto</a>
     <a href="#" role="menuitem">Meine Bestellungen</a>
-    <a href="#" role="menuitem">Persönliche Daten</a>
     <div class="dropdown-divider"></div>
     <a href="#" role="menuitem" data-logout>Abmelden</a>
   `;
@@ -92,7 +91,30 @@ function renderUserMenu(user) {
   const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.email || "";
   userDropdown.querySelector("[data-user-name]").textContent = name;
   userDropdown.querySelector("[data-logout]").addEventListener("click", logout);
+  setUserIcon(user.avatar_url);
 }
+
+/* Standard-Symbol im Benutzer-Icon (wird gemerkt, damit es nach "Bild entfernen" zurückkommt). */
+const defaultUserIcon = userButton.innerHTML;
+
+/**
+ * Zeigt das Profilbild rund im Benutzer-Icon oder, ohne Bild, das Standard-Symbol.
+ * Die Seite "Mein Konto" meldet ein neues Bild über das Ereignis "laserflow:avatar-changed".
+ * @param {string|null|undefined} url Adresse des Profilbilds (avatar_url vom Backend)
+ */
+function setUserIcon(url) {
+  if (!url) {
+    userButton.innerHTML = defaultUserIcon;
+    return;
+  }
+  const image = document.createElement("img");
+  image.className = "user-avatar";
+  image.src = url;
+  image.alt = ""; // der Knopf hat schon aria-label="Benutzerkonto"
+  userButton.replaceChildren(image);
+}
+
+window.addEventListener("laserflow:avatar-changed", (event) => setUserIcon(event.detail.avatarUrl));
 
 /** Abmelden: Sitzung im Backend beenden und zur Startseite. */
 async function logout(event) {
