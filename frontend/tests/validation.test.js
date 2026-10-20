@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import {
   required, email, strongPassword, matchesField, personName,
   street, postalCode, city, accepted, validateAll, PASSWORD_MIN_LENGTH,
+  verificationCode, VERIFICATION_CODE_LENGTH,
 } from "../js/modules/validation.js";
 
 test("required: leere und nur aus Leerzeichen bestehende Werte sind ungültig", () => {
@@ -94,4 +95,13 @@ test("validateAll: sammelt nur die Fehler der ungültigen Felder, erste Regel ge
   const errors = validateAll({ email: "", password: "" }, schema);
   assert.deepEqual(Object.keys(errors).sort(), ["email", "password"]);
   assert.equal(errors.email, required(""));
+});
+
+test("verificationCode: genau vier Ziffern, auch mit führender Null", () => {
+  assert.equal(VERIFICATION_CODE_LENGTH, 4);
+  assert.equal(verificationCode("0427"), null);
+  assert.equal(verificationCode(" 1234 "), null);
+  for (const value of ["", "123", "12345", "12a4", "12 4"]) {
+    assert.ok(verificationCode(value), value);
+  }
 });

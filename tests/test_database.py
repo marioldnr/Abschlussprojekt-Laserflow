@@ -11,7 +11,7 @@ from app.orders.models import CartItem, Order, OrderItem
 from app.production.models import ProductionFile, ProductionJob
 
 EXPECTED_TABLES = {
-    "users", "verification_codes", "addresses",
+    "users", "verification_codes", "addresses", "sessions",
     "products", "product_images",
     "customer_images",
     "cart_items", "orders", "order_items",
