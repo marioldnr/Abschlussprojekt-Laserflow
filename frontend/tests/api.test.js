@@ -74,13 +74,13 @@ test("login: schickt getrimmte E-Mail, 401 und 403 bekommen verständliche Meldu
 test("register: wandelt Feldnamen ins Backend-Format, 409 = E-Mail vergeben", async () => {
   const data = {
     email: "a@b.de", password: "geheim123", firstName: " Anna ", lastName: "Muster",
-    street: "Musterstraße 1", postalCode: "12345", city: "Musterstadt",
+    street: "Musterstraße", houseNumber: "1", postalCode: "12345", city: "Musterstadt",
   };
   const calls = mockFetch(201, { id: 7 });
   await register(data);
   assert.deepEqual(JSON.parse(calls[0].options.body), {
     email: "a@b.de", password: "geheim123", first_name: "Anna", last_name: "Muster",
-    street: "Musterstraße 1", postal_code: "12345", city: "Musterstadt",
+    street: "Musterstraße", house_number: "1", postal_code: "12345", city: "Musterstadt",
   });
 
   mockFetch(409, { detail: "exists" });
@@ -93,12 +93,14 @@ test("fieldErrorsFromApi: Backend-Feldnamen werden zu Formular-Feldnamen", () =>
       { loc: ["body", "postal_code"], msg: "Bitte gib eine Postleitzahl mit fünf Ziffern ein." },
       { loc: ["body", "first_name"], msg: "Name falsch" },
       { loc: ["body", "password"], msg: "Passwort zu kurz" },
+      { loc: ["body", "house_number"], msg: "Hausnummer falsch" },
     ],
   });
   assert.deepEqual(fieldErrorsFromApi(error), {
     postalCode: "Bitte gib eine Postleitzahl mit fünf Ziffern ein.",
     firstName: "Name falsch",
     password: "Passwort zu kurz",
+    houseNumber: "Hausnummer falsch",
   });
 });
 
@@ -111,7 +113,7 @@ test("register: 422 behält die Feldfehler in error.details", async () => {
   mockFetch(422, { detail: [{ loc: ["body", "email"], msg: "E-Mail ungültig" }] });
   const data = {
     email: "a@b.de", password: "geheim123", firstName: "Anna", lastName: "Muster",
-    street: "Musterstraße 1", postalCode: "12345", city: "Musterstadt",
+    street: "Musterstraße", houseNumber: "1", postalCode: "12345", city: "Musterstadt",
   };
   await assert.rejects(register(data), (error) => error.status === 422 && fieldErrorsFromApi(error).email === "E-Mail ungültig");
 });

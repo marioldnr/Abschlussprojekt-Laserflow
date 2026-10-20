@@ -21,7 +21,8 @@ VALID_DATA = {
     "password": "geheim123",
     "first_name": "Anna",
     "last_name": "Muster",
-    "street": "Musterstraße 12",
+    "street": "Musterstraße",
+    "house_number": "12",
     "postal_code": "12345",
     "city": "Musterstadt",
 }
@@ -69,7 +70,14 @@ def test_validation_accepts_valid_data():
         ("email", "na me@beispiel.de", "gültige E-Mail"),
         ("first_name", "A", "gültigen Namen"),
         ("last_name", "R2D2", "gültigen Namen"),
-        ("street", "Musterstraße", "Straße und Hausnummer"),
+        ("street", "Musterstraße 12", "Hausnummer im Feld daneben"),  # Zahl in der Straße
+        ("street", "Hauptstr.", "nur Buchstaben"),  # Sonderzeichen
+        ("street", "Am  Ring", "nur Buchstaben"),  # doppeltes Leerzeichen
+        ("street", "A", "nur Buchstaben"),  # zu kurz
+        ("house_number", "a12", "Nur Ziffern"),
+        ("house_number", "12ab", "Nur Ziffern"),
+        ("house_number", "12-14", "Nur Ziffern"),
+        ("house_number", "12345", "Nur Ziffern"),
         ("postal_code", "1234", "fünf Ziffern"),
         ("postal_code", "12a45", "fünf Ziffern"),
         ("city", "Berlin 10", "gültigen Ort"),
@@ -82,9 +90,14 @@ def test_validation_rejects_invalid_values(field, value, expected_part):
     assert expected_part in errors[field]
 
 
-@pytest.mark.parametrize("street", ["Am Ring 3a", "Hauptstr. 7", "Lange Gasse 10-12", "Schloßallee 1/2"])
+@pytest.mark.parametrize("street", ["Am Ring", "Karl-Marx-Straße", "Schloßallee", "Lange Gasse"])
 def test_validation_accepts_common_streets(street):
     assert validate_registration({**VALID_DATA, "street": street}) == {}
+
+
+@pytest.mark.parametrize("house_number", ["1", "12", "12a", "1234B"])
+def test_validation_accepts_common_house_numbers(house_number):
+    assert validate_registration({**VALID_DATA, "house_number": house_number}) == {}
 
 
 def test_validation_password_boundary_exactly_eight_characters():
@@ -145,9 +158,10 @@ def test_register_sends_mail_with_four_digit_code(db, sent_mails):
 
 
 def test_register_trims_spaces(db, sent_mails):
-    user = register(db, first_name="  Anna ", city=" Köln ", email="  anna@example.de ")
+    user = register(db, first_name="  Anna ", city=" Köln ", email="  anna@example.de ", street=" Am Ring ", house_number=" 3a ")
     assert user.first_name == "Anna"
     assert user.addresses[0].city == "Köln"
+    assert user.addresses[0].street == "Am Ring 3a"  # Straße und Hausnummer zusammen gespeichert
     assert user.email == "anna@example.de"
 
 

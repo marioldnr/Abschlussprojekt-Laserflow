@@ -22,8 +22,11 @@ _NAME_CHARS = rf"(?:{_LETTER}|[\s.'-])"
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$")
 POSTAL_CODE_PATTERN = re.compile(r"^[0-9]{5}$")
 NAME_PATTERN = re.compile(rf"^{_LETTER}{_NAME_CHARS}*$")
-# Straße mit Hausnummer, z. B. "Musterstraße 12", "Am Ring 3a", "Hauptstr. 4-6"
-STREET_PATTERN = re.compile(rf"^{_LETTER}{_NAME_CHARS}*\s+[0-9]+[a-zA-Z]?(?:\s*[-/]\s*[0-9]+[a-zA-Z]?)?$")
+# Straße ohne Hausnummer: nur Buchstaben, zwischen Wörtern genau ein Leerzeichen oder Bindestrich
+# ("Am Ring", "Karl-Marx-Straße"). Keine Ziffern, keine Sonderzeichen.
+STREET_NAME_PATTERN = re.compile(rf"^{_LETTER}+(?:[ -]{_LETTER}+)*$")
+# Hausnummer: 1 bis 4 Ziffern, danach höchstens ein Buchstabe ("12", "12a").
+HOUSE_NUMBER_PATTERN = re.compile(r"^[0-9]{1,4}[a-zA-Z]?$")
 
 
 def check_email(value: str) -> str | None:
@@ -56,10 +59,23 @@ def check_name(value: str) -> str | None:
 
 
 def check_street(value: str) -> str | None:
-    """Straße mit Hausnummer (Plausibilitätsprüfung laut Use Case "Registrieren")."""
+    """Straßenname ohne Hausnummer: nur Buchstaben, 2 bis 100 Zeichen.
+
+    Leerzeichen und Bindestrich sind zwischen Wörtern erlaubt, Ziffern und andere
+    Sonderzeichen nicht (Plausibilitätsprüfung laut Use Case "Registrieren").
+    """
     text = value.strip()
-    if len(text) > 200 or not STREET_PATTERN.match(text):
-        return "Bitte gib Straße und Hausnummer an, z. B. Musterstraße 12."
+    if any(char in "0123456789" for char in text):
+        return "Bitte gib die Hausnummer im Feld daneben ein. Die Straße darf keine Zahlen enthalten."
+    if not 2 <= len(text) <= 100 or not STREET_NAME_PATTERN.match(text):
+        return "Die Straße darf nur Buchstaben enthalten (Leerzeichen und Bindestrich sind erlaubt), z. B. Musterstraße."
+    return None
+
+
+def check_house_number(value: str) -> str | None:
+    """Hausnummer: Ziffern, danach höchstens ein Buchstabe, z. B. 12 oder 12a."""
+    if not HOUSE_NUMBER_PATTERN.match(value.strip()):
+        return "Nur Ziffern und höchstens ein Buchstabe, z. B. 12 oder 12a."
     return None
 
 
@@ -84,6 +100,7 @@ REGISTRATION_RULES = {
     "last_name": check_name,
     "email": check_email,
     "street": check_street,
+    "house_number": check_house_number,
     "postal_code": check_postal_code,
     "city": check_city,
     "password": check_password,

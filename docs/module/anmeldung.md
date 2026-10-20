@@ -49,7 +49,7 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 
 **Registrieren**
 
-1. Eingaben werden im Browser geprüft: Pflichtfelder, E-Mail-Format, Name, Adresse auf Plausibilität (Straße mit Hausnummer, PLZ mit 5 Ziffern, Ort), Passwortstärke, Übereinstimmung der Passwörter, Zustimmung zu AGB und Datenschutz. Fehler: Feld rot, Meldung darunter (z. B. „Das Passwort muss mindestens einen Buchstaben und eine Ziffer enthalten.“).
+1. Eingaben werden im Browser geprüft: Pflichtfelder, E-Mail-Format, Name, Adresse auf Plausibilität (Straße nur aus Buchstaben, Hausnummer aus Ziffern und höchstens einem Buchstaben, PLZ mit 5 Ziffern, Ort), Passwortstärke, Übereinstimmung der Passwörter, Zustimmung zu AGB und Datenschutz. Fehler: Feld rot, Meldung darunter (z. B. „Das Passwort muss mindestens einen Buchstaben und eine Ziffer enthalten.“).
 2. `POST /api/auth/register`: Das Backend prüft alles noch einmal (`validation.py`), schreibt die E-Mail klein, legt das Konto (noch nicht bestätigt) und die Adresse als Lieferadresse an, speichert das Passwort als scrypt-Hash und schickt einen 4-stelligen Code per E-Mail.
 3. Fehler vom Backend erscheinen ebenfalls am Feld: E-Mail schon vergeben (409) bzw. Feldfehler (422).
 4. Erfolg: Weiter zu `bestaetigen.html?email=...`.
@@ -80,7 +80,7 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 
 | Methode und Pfad | Body | Antworten |
 | --- | --- | --- |
-| `POST /api/auth/register` | `{ email, password, first_name, last_name, street, postal_code, city }` | `201` angelegt, Code verschickt · `409` E-Mail schon registriert · `422` ungültige Daten |
+| `POST /api/auth/register` | `{ email, password, first_name, last_name, street, house_number, postal_code, city }` | `201` angelegt, Code verschickt · `409` E-Mail schon registriert · `422` ungültige Daten |
 | `POST /api/auth/verify` | `{ email, code }` | `200` Kundendaten + Sitzungs-Cookie · `400` Code falsch · `409` schon bestätigt · `410` Code abgelaufen · `429` zu viele Fehlversuche |
 | `POST /api/auth/resend-code` | `{ email }` | `204` immer (auch bei unbekannter E-Mail) |
 | `POST /api/auth/login` | `{ email, password }` | `200` Kundendaten + Sitzungs-Cookie · `401` falsche Zugangsdaten · `403` Konto nicht bestätigt |
@@ -101,6 +101,7 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - **Prüfregeln doppelt (Browser und Backend):** Browser-Prüfungen kann man umgehen. Wer eine Regel ändert, ändert sie in `validation.js` und `validation.py`.
 - **E-Mails im Terminal** (`MAIL_MODE = "console"`): Beim Entwickeln steht der Code im Terminal, in dem uvicorn läuft. Für einen lokalen Mailserver `MAIL_MODE = "smtp"` setzen. Laut Vorgaben kein Cloud-Dienst.
 - **Name und Adresse bei der Registrierung:** Das Wireframe zeigt nur E-Mail und Passwort, der Use Case „Registrieren“ verlangt aber „Adresse auf Plausibilität prüfen“. Die Adresse wird als Lieferadresse (`type = "shipping"`) gespeichert.
+- **Straße und Hausnummer: zwei Felder im Formular, eine Spalte in der Datenbank.** Getrennte Felder, damit jedes seine eigene Prüfung und Fehlermeldung hat. Straße: nur Buchstaben, zwischen Wörtern ein Leerzeichen oder Bindestrich („Am Ring“, „Karl-Marx-Straße“). Hausnummer: 1–4 Ziffern, danach höchstens ein Buchstabe („12“, „12a“). Gespeichert wird beides zusammen in `addresses.street` („Musterstraße 12“), so wie es das Datenmodell festlegt (`CLAUDE.md`, Abschnitt Datenbank); eine Model-Änderung war dafür nicht nötig.
 - **Passwortregel:** mindestens 8 Zeichen, mindestens ein Buchstabe und eine Ziffer (Backend zusätzlich höchstens 128 Zeichen).
 - **`?weiter=` nur mit relativen Pfaden:** schützt vor Weiterleitungen auf fremde Seiten (Open Redirect), siehe `safeReturnTarget()`.
 - **Fehler verschwinden erst beim Tippen, nicht beim Verlassen des Feldes:** Sonst rutscht der Absende-Button beim Klick nach oben und der Klick geht ins Leere.
@@ -119,5 +120,6 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - Abgelaufene Sitzungen werden erst gelöscht, wenn jemand sie benutzt.
 - Wer sich mit einer falschen E-Mail-Adresse registriert, kann sie nicht ändern, sondern muss sich neu registrieren; das falsche, unbestätigte Konto bleibt bestehen.
 - „Passwort vergessen“ ist in den Use Cases nicht vorgesehen und deshalb nicht umgesetzt.
+- Durch die strengen Adressregeln gehen manche echten Adressen nicht: Abkürzungen mit Punkt („Hauptstr.“ → „Hauptstraße“ ausschreiben), Straßen mit Zahl im Namen („Straße des 17. Juni“) und Hausnummern wie „10-12“ oder „12/1“.
 - Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü und zu AGB/Datenschutz führen noch auf `#`.
 - Der Warenkorb-Zähler im Kopfbereich weiß noch nichts von der Anmeldung.

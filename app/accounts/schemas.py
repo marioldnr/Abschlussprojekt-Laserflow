@@ -9,13 +9,18 @@ from pydantic import BaseModel, ConfigDict
 
 
 class RegisterRequest(BaseModel):
-    """Daten aus dem Registrierungsformular (frontend/registrieren.html)."""
+    """Daten aus dem Registrierungsformular (frontend/registrieren.html).
+
+    Straße und Hausnummer kommen getrennt, damit jedes Feld seine eigene Prüfung
+    und Fehlermeldung hat. Gespeichert werden sie zusammen (siehe service.register_user).
+    """
 
     email: str
     password: str
     first_name: str
     last_name: str
     street: str
+    house_number: str
     postal_code: str
     city: str
 

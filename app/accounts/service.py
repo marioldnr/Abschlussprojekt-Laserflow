@@ -247,8 +247,12 @@ def register_user(db: Session, data: RegisterRequest) -> User:
         last_name=data.last_name.strip(),
     )
     # Die Adresse aus dem Formular wird als Lieferadresse gespeichert.
+    # Straße und Hausnummer kommen getrennt, stehen aber in EINER Spalte ("Musterstraße 12"):
+    # So ist es im Datenmodell festgelegt (CLAUDE.md, Abschnitt Datenbank), und Bestellungen
+    # kopieren die Adresse genau in dieser Form.
+    street_with_number = f"{data.street.strip()} {data.house_number.strip()}"
     user.addresses.append(
-        Address(type="shipping", street=data.street.strip(), postal_code=data.postal_code.strip(), city=data.city.strip())
+        Address(type="shipping", street=street_with_number, postal_code=data.postal_code.strip(), city=data.city.strip())
     )
     db.add(user)
     try:

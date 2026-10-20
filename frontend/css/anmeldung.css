@@ -112,6 +112,11 @@
   color: var(--text);
 }
 
+/* Straße breit, Hausnummer schmal (Gegenstück zu .form-row-narrow-first in components.css) */
+.form-row-narrow-last {
+  grid-template-columns: 1.5fr 0.5fr;
+}
+
 /* Eingabefeld für den 4-stelligen Bestätigungscode: groß, mittig, Ziffern mit Abstand */
 .input-code {
   text-align: center;

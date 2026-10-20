@@ -113,10 +113,19 @@
               <p class="field-error" id="email-error" hidden></p>
             </div>
 
+            <!-- Straße und Hausnummer getrennt, damit jedes Feld seine eigene Prüfung hat.
+                 Gespeichert wird beides zusammen ("Musterstraße 12"), siehe docs/module/anmeldung.md -->
+            <div class="form-row form-row-narrow-last">
             <div class="field">
-              <label class="field-label" for="street">Straße und Hausnummer</label>
+              <label class="field-label" for="street">Straße</label>
               <input class="input" id="street" name="street" type="text" autocomplete="address-line1" required aria-describedby="street-error">
               <p class="field-error" id="street-error" hidden></p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="houseNumber">Hausnr.</label>
+              <input class="input" id="houseNumber" name="houseNumber" type="text" required aria-describedby="houseNumber-error" maxlength="5" spellcheck="false">
+              <p class="field-error" id="houseNumber-error" hidden></p>
+            </div>
             </div>
 
             <div class="form-row form-row-narrow-first">
