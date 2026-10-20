@@ -10,6 +10,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.accounts.router import router as accounts_router
 from app.database import init_db
 
 # Alle Tabellen anlegen, die es in laserflow.db noch nicht gibt (siehe database.init_db).
@@ -17,8 +18,9 @@ init_db()
 
 app = FastAPI(title="LaserFlow")
 
-# Hier kommen später die Router dazu, z. B.:
-# app.include_router(accounts_router, prefix="/api/auth")
+# Router der Fachmodule (Endpunkte unter /api/...). Neue Router hier ergänzen,
+# immer VOR app.mount("/") weiter unten.
+app.include_router(accounts_router)  # /api/auth/... (Registrieren, Bestätigen, Anmelden)
 
 # Frontend ausliefern (HTML, CSS, JS, Bilder). Muss als Letztes stehen,
 # weil "/" sonst alle anderen Pfade überdecken würde.

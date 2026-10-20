@@ -15,6 +15,9 @@ export const PASSWORD_MIN_LENGTH = 8;
 // Eine "perfekte" Regex gibt es nicht; die endgültige Prüfung macht die Bestätigungs-E-Mail.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+/** Länge des Bestätigungscodes aus der E-Mail. Muss zum Backend passen (app/accounts/service.py). */
+export const VERIFICATION_CODE_LENGTH = 4;
+
 // Deutsche Postleitzahl: genau fünf Ziffern.
 const POSTAL_CODE_PATTERN = /^\d{5}$/;
 
@@ -126,6 +129,18 @@ export function city(value) {
  */
 export function accepted(checked) {
   return checked === true ? null : "Bitte bestätige, dass du die AGB und die Datenschutzerklärung akzeptierst.";
+}
+
+/**
+ * Bestätigungscode aus der E-Mail: genau VERIFICATION_CODE_LENGTH Ziffern.
+ * @param {string} value
+ * @returns {string|null}
+ */
+export function verificationCode(value) {
+  const pattern = new RegExp(`^\\d{${VERIFICATION_CODE_LENGTH}}$`);
+  return pattern.test(String(value).trim())
+    ? null
+    : `Bitte gib den ${VERIFICATION_CODE_LENGTH}-stelligen Code aus der E-Mail ein.`;
 }
 
 /**

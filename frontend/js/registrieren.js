@@ -4,9 +4,11 @@
  * Ablauf laut Use Case "Registrieren":
  * 1. Registrierungsdaten eingeben und im Browser prüfen
  *    (E-Mail-Format, Adresse auf Plausibilität, Passwörter auf Übereinstimmung).
- * 2. Daten an das Backend schicken. Das Backend prüft die E-Mail-Eindeutigkeit,
- *    speichert das Passwort gehasht und verschickt die Bestätigungs-E-Mail.
- * 3. Erfolg: Hinweis anzeigen, dass die E-Mail bestätigt werden muss.
+ *    Fehler: Feld wird rot markiert, darunter steht, was nicht passt.
+ * 2. Daten an das Backend schicken. Das Backend prüft alles noch einmal, prüft die
+ *    E-Mail-Eindeutigkeit, speichert das Passwort gehasht und schickt einen 4-stelligen Code.
+ *    Findet das Backend Fehler, erscheinen sie ebenfalls am passenden Feld.
+ * 3. Erfolg: weiter zur Seite "E-Mail bestätigen" (bestaetigen.html), dort wird der Code eingegeben.
  */
 
 import {
@@ -31,7 +33,8 @@ import {
   focusFirstError,
   readValues,
 } from "./modules/form.js";
-import { register } from "./modules/auth-api.js";
+import { register, fieldErrorsFromApi } from "./modules/auth-api.js";
+import { verifyUrlFor, RETURN_PARAM } from "./modules/navigation.js";
 import { initAgbDialog } from "./modules/agb-dialog.js";
 
 /** Prüfregeln pro Feld (Feldnamen = name-Attribute im HTML). */
@@ -48,7 +51,6 @@ const REGISTER_SCHEMA = {
 };
 
 const form = document.getElementById("register-form");
-const successPanel = document.getElementById("register-success");
 
 initPasswordToggles(form);
 initAgbDialog(); // AGB-Popup (Issue #38)
@@ -73,27 +75,35 @@ form.addEventListener("submit", async (event) => {
   setBusy(form, true);
   try {
     await register(values);
-    showSuccess(values.email);
+    // Weiter zur Code-Eingabe. Das Ziel aus ?weiter= wird mitgenommen.
+    const returnTarget = new URLSearchParams(window.location.search).get(RETURN_PARAM);
+    window.location.assign(verifyUrlFor(values.email, returnTarget));
   } catch (error) {
-    if (error.status === 409) {
-      // E-Mail schon vergeben: Fehler direkt am Feld anzeigen
-      setFieldError(form, "email", error.message);
-      focusFirstError(form);
-    } else {
-      showAlert(form, error.message, "error");
-    }
+    showServerErrors(error);
   } finally {
     setBusy(form, false);
   }
 });
 
 /**
- * Ersetzt das Formular durch den Hinweis "Bitte E-Mail bestätigen".
- * @param {string} address die eingegebene E-Mail-Adresse
+ * Zeigt Fehler vom Backend an: Feldfehler direkt am Feld, alles andere über dem Formular.
+ * @param {import("./modules/api-client.js").ApiError} error
  */
-function showSuccess(address) {
-  successPanel.querySelector("[data-email]").textContent = address.trim();
-  form.hidden = true;
-  successPanel.hidden = false;
-  successPanel.focus();
+function showServerErrors(error) {
+  if (error.status === 409) {
+    // E-Mail schon vergeben
+    setFieldError(form, "email", error.message);
+    focusFirstError(form);
+    return;
+  }
+  const fieldErrors = error.status === 422 ? fieldErrorsFromApi(error) : {};
+  const knownFields = Object.keys(fieldErrors).filter((name) => form.elements.namedItem(name));
+  if (knownFields.length > 0) {
+    for (const name of knownFields) {
+      setFieldError(form, name, fieldErrors[name]);
+    }
+    focusFirstError(form);
+    return;
+  }
+  showAlert(form, error.message, "error");
 }
