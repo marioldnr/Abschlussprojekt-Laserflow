@@ -91,6 +91,8 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 6. Schließen per ✕, „Gelesen und schließen“, Esc oder Klick auf den abgedunkelten Hintergrund.
 7. Ohne JavaScript öffnen die Links die Seite einfach in einem neuen Tab (`target="_blank"`).
 
+Der Footer jeder Seite verlinkt „AGB“ und „Datenschutz“ direkt auf `agb.html` bzw. `datenschutz.html` (Issue #50). Neue Seiten bekommen die Links automatisch über `vorlage.html`.
+
 Weiteren Rechtstext anbinden: Seite aus `agb.html` kopieren, Text in `<article id="legal-text">` schreiben, Link mit `href="<seite>.html" target="_blank" rel="noopener" data-agb-open` setzen. Am JavaScript ändert sich nichts.
 
 ## Schnittstelle zum Backend (Vertrag)
@@ -150,8 +152,7 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - Abgelaufene Sitzungen werden erst gelöscht, wenn jemand sie benutzt.
 - Wer sich mit einer falschen E-Mail-Adresse registriert, kann sie nicht ändern, sondern muss sich neu registrieren; das falsche, unbestätigte Konto bleibt bestehen.
 - „Passwort vergessen“ ist in den Use Cases nicht vorgesehen und deshalb nicht umgesetzt.
-- Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü und zu AGB/Datenschutz führen noch auf `#`.
+- Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü führen noch auf `#`.
 - Der Warenkorb-Zähler im Kopfbereich weiß noch nichts von der Anmeldung.
-- Die Footer-Links „AGB“ und „Datenschutz“ auf allen Seiten führen noch auf `#` (eigenes Issue, betrifft die gemeinsame `vorlage.html`).
 - In AGB und Datenschutzerklärung sind einige Punkte noch „[noch offen]“ (siehe „Bewusste Entscheidungen“).
 - Die Seiten laden Schriften von Google Fonts; die IP-Adresse geht dabei an Google. Das steht in der Datenschutzerklärung; ob die Schriften lokal eingebunden werden, entscheidet das Team.
