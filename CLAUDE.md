@@ -28,7 +28,8 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 - **Neues Fachmodul mit Tabellen:** Import in `init_db()` ergänzen, sonst wird die Tabelle nicht angelegt.
 - **Feste Entscheidungen, nicht „reparieren“:** Preise in Cent (`int`), Maße in mm, nur Dateipfade in der DB, Löschen nur per Flag (`is_active`, `is_hidden`, `anonymized_at`), Adresse und Stückpreis werden in die Bestellung kopiert, Straße mit Hausnummer in einem Feld und PLZ als `postal_code` (wie im Registrierungsformular), Status-Werte als Text (erlaubte Werte im Docstring, Prüfung im Service). Fremdschlüssel über Tabellennamen, z. B. `ForeignKey("users.id")`.
 - **Tests:** Die Fixture `db` aus `tests/conftest.py` liefert pro Test eine leere Datenbank im Arbeitsspeicher. Tests laufen nie gegen `laserflow.db`.
-- **Offen:** US02 Bestätigung per Code oder Link (Spalte `code` passt für beides). Es gibt noch keine `.gitignore`, deshalb `laserflow.db` und `__pycache__/` nie committen und gezielt `git add` nutzen.
+- **Entschieden:** US02 Bestätigung per 4-stelligem Code per E-Mail (nicht per Link).
+- **Offen:** Es gibt noch keine `.gitignore`, deshalb `laserflow.db`, `.env`, `uploads/` und `__pycache__/` nie committen und gezielt `git add` nutzen.
 
 ### Wie wir arbeiten: Scrumban (nach dem RDF-Leitfaden)
 
@@ -106,7 +107,8 @@ Wenn eine dieser Dateien in `git status` auftaucht: nicht committen, sondern auf
 - Stories, Akzeptanzkriterien oder Prioritäten ändern (das entscheidet der Product Owner)
 - Karten auf dem Board verschieben oder Aufgaben in den Sprint holen
 - Den Tech Stack ändern oder neue Frameworks einführen
-- Externe Dienste einbauen, die die Stories ausschließen: KI-Modelle laufen auf dem eigenen Server, E-Mails ohne Cloud-Dienst (lokaler Mailserver), Bezahlung wird nur simuliert
+- Externe Dienste einbauen, die die Stories ausschließen: KI-Modelle laufen auf dem eigenen Server, Bezahlung wird nur simuliert
+- Weitere externe Dienste ohne Absprache einbauen. Einzige Ausnahme (Team-Entscheidung 10.11.2026): E-Mails gehen über das Gmail-Konto des Teams (SMTP mit App-Passwort, siehe `app/mail.py`). Zugangsdaten stehen nur in der lokalen `.env`, nie im Repo; ohne `.env` erscheinen E-Mails im Terminal.
 
 ## 7. Fertig heißt (Definition of Done)
 
