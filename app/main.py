@@ -14,10 +14,14 @@ from app.accounts.account_router import router as account_router
 from app.accounts.account_service import anonymize_pending_accounts
 from app.accounts.employee_router import router as employee_router
 from app.accounts.router import router as accounts_router
+from app import config
 from app.database import SessionLocal, init_db
 
-# Alle Tabellen anlegen, die es in laserflow.db noch nicht gibt (siehe database.init_db).
-init_db()
+# Nur bei SQLite (lokale Datei) legt die App die Tabellen beim Start selbst an.
+# Bei Neon (Postgres) macht das Alembic (`alembic upgrade head`), nicht der App-Start.
+# Sonst könnten Code und Datenbank unbemerkt auseinanderlaufen.
+if config.is_sqlite():
+    init_db()
 
 # Gelöschte Konten anonymisieren, deren Bestellungen inzwischen alle versendet sind (US10).
 with SessionLocal() as startup_db:

@@ -1,0 +1,19 @@
+# Geheimnisse: lokale Einstellungen mit Datenbank-Adresse und Passwort (nie committen)
+.env
+
+# Datenbank-Dateien: lokale SQLite-Datenbank (Notfallnetz und Tests)
+laserflow.db
+*.db
+
+# Python: virtuelle Umgebung und Caches (werden automatisch neu erzeugt)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Hochgeladene Kundenbilder und erzeugte Produktionsdateien (nicht ins Repo)
+uploads/
+storage/
+
+# Frontend-Abhängigkeiten (npm)
+node_modules/
