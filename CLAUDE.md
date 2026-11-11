@@ -12,7 +12,7 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 ## 0. Projekt-Infos
 
 - **Anwendung:** Web-App für personalisierte Lasergravuren (Upload → KI-Bildaufbereitung → Warenkorb → laserfertige Produktionsdatei). Läuft für Entwicklung und Demos lokal.
-- **Tech Stack (festgelegt, nicht ändern):** Python 3.11–3.13, FastAPI, SQLAlchemy, SQLite; Bilddateien und Produktionsdateien (PNG, JPEG, SVG, DXF) im Dateisystem, in der Datenbank nur der Pfad. Frontend: HTML, CSS, JavaScript ohne Framework. KI-Bildaufbereitung mit vortrainierten Modellen (rembg/u2net) lokal auf dem Server.
+- **Tech Stack (festgelegt, nicht ändern):** Python 3.11–3.13, FastAPI, SQLAlchemy mit Alembic-Migrationen; gemeinsame PostgreSQL-Datenbank bei Neon (Cloud), lokal SQLite als Notfallnetz. Bilddateien und Produktionsdateien (PNG, JPEG, SVG, DXF) liegen im Dateisystem, in der Datenbank nur der Pfad. Frontend: HTML, CSS, JavaScript ohne Framework. KI-Bildaufbereitung mit vortrainierten Modellen (rembg/u2net) lokal auf dem Server.
 - **Architektur:** modularer Monolith mit Schichten. Router (Endpunkte) → Services (Logik) → Models (Datenbank). Logik gehört in Services, nicht in Router.
 - **Stories:** Jede Aufgabe gehört zu einer der 15 User Stories (US01–US15). Die Akzeptanzkriterien der Story sind der Maßstab. Liegen sie dir nicht vor, frag das Teammitglied danach, statt sie zu erraten.
 - **Design:** Alle Seiten folgen dem Designsystem in `docs/design.md`. Lies es, bevor du HTML oder CSS schreibst. Neue Seiten entstehen aus `frontend/vorlage.html`; Farben, Schriften und Abstände kommen nur aus den Variablen in `css/design.css`. **Jede Seite muss das LaserFlow-Logo (Kopf- und Fußbereich) und das Favicon enthalten**, unverändert aus `vorlage.html` bzw. `frontend/img/logo/`. Buttons sind immer im Glas-Look (`.button` / `.button-ghost` aus `design.css`), nie als selbst gebaute, voll gefüllte Farbflächen. Formulare und JavaScript-Module folgen `docs/design.md` (Abschnitte 11 und 12). `design.css`, `layout.css`, `components.css`, `js/layout.js` und `vorlage.html` sind gemeinsame Bausteine (Abschnitt 2).
@@ -21,14 +21,17 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 
 ### Datenbank
 
-- **Aufbau:** eine SQLite-Datei `laserflow.db` (nicht in Git). Pfad in `app/config.py`, Verbindung in `app/database.py` (`engine`, `SessionLocal`, `Base`, `get_db`, `init_db`).
+- **Aufbau:** Das Team nutzt eine gemeinsame PostgreSQL-Datenbank bei Neon (Region Frankfurt), damit alle dieselben Daten sehen. Die Adresse steht als `DATABASE_URL` in der eigenen `.env` (Vorlage: `.env.example`). Ohne `.env` nutzt die App die lokale SQLite-Datei `laserflow.db` als Notfallnetz, z. B. ohne Internet. Einstellungen in `app/config.py` (`DATABASE_URL`, `is_sqlite()`), Verbindung in `app/database.py` (`engine`, `SessionLocal`, `Base`, `get_db`, `import_models`, `init_db`). Details: `docs/module/datenbank.md`.
+- **Zugangsdaten:** Die Neon-Adresse enthält das Passwort. Sie steht nur in der eigenen `.env`, nie in Git, Code, Issues, Pull Requests oder im Chat. Claude fragt nie danach.
 - **Tabellen liegen im Fachmodul** in `models.py`, keine zentrale Models-Datei: `accounts` (users, verification_codes, addresses), `catalog` (products, product_images), `images` (customer_images), `orders` (cart_items, orders, order_items), `production` (production_jobs, production_files).
 - **Darauf aufbauen** (z. B. Registrieren): im Fachmodul `router.py` (Endpunkt, Session über `Depends(get_db)`) und `service.py` (Logik) anlegen und die vorhandenen Models importieren. Router in `app/main.py` **vor** `app.mount("/", …)` einbinden.
-- **Tabellen ändern:** Models sind gemeinsame Dateien (Abschnitt 2), also vorher im Team absprechen, eigener PR. Es gibt keine Migrationen: `create_all` ändert bestehende Tabellen nicht, nach einer Änderung lokal `laserflow.db` löschen.
-- **Neues Fachmodul mit Tabellen:** Import in `init_db()` ergänzen, sonst wird die Tabelle nicht angelegt.
+- **Tabellen ändern heißt Migration schreiben:** Models sind gemeinsame Dateien (Abschnitt 2), also vorher im Team absprechen, eigener PR. Jede Änderung an einem Model braucht im selben PR eine Alembic-Migration: `alembic revision --autogenerate -m "kurze Beschreibung"`, die neue Datei in `alembic/versions/` lesen und prüfen, dann `pytest`. Der Test `test_models_and_migrations_are_in_sync` schlägt fehl, wenn Model und Migration nicht zusammenpassen. Bestehende Migrationsdateien werden nie geändert, nur neue angelegt. `laserflow.db` löschen hilft nicht mehr, Neon wird dadurch nicht geändert.
+- **Migration in Neon einspielen:** `alembic upgrade head` gegen die gemeinsame Datenbank erst nach dem Merge und nach Absprache im Team. Claude führt das nie ohne ausdrückliches Go aus.
+- **Neues Fachmodul mit Tabellen:** Import in `import_models()` in `app/database.py` ergänzen, sonst sehen Alembic und die Tests die Tabelle nicht. Danach Migration wie oben.
 - **Feste Entscheidungen, nicht „reparieren“:** Preise in Cent (`int`), Maße in mm, nur Dateipfade in der DB, Löschen nur per Flag (`is_active`, `is_hidden`, `anonymized_at`), Adresse und Stückpreis werden in die Bestellung kopiert, Straße mit Hausnummer in einem Feld und PLZ als `postal_code` (wie im Registrierungsformular), Status-Werte als Text (erlaubte Werte im Docstring, Prüfung im Service). Fremdschlüssel über Tabellennamen, z. B. `ForeignKey("users.id")`.
-- **Tests:** Die Fixture `db` aus `tests/conftest.py` liefert pro Test eine leere Datenbank im Arbeitsspeicher. Tests laufen nie gegen `laserflow.db`.
-- **Offen:** US02 Bestätigung per Code oder Link (Spalte `code` passt für beides). Es gibt noch keine `.gitignore`, deshalb `laserflow.db` und `__pycache__/` nie committen und gezielt `git add` nutzen.
+- **Tests:** Die Fixture `db` aus `tests/conftest.py` liefert pro Test eine leere Datenbank im Arbeitsspeicher. `tests/conftest.py` stellt die App für Tests auf eine Wegwerf-SQLite-Datei um, Tests laufen also nie gegen Neon oder `laserflow.db`.
+- **Erster Admin:** `python -m scripts.seed_db` legt ihn in der Datenbank an, auf die die `.env` zeigt. Mit Neon reicht das einmal für das ganze Team.
+- **Offen:** US02 Bestätigung per Code oder Link (Spalte `code` passt für beides). Bilder (Profilbilder, später Produktbilder) liegen noch lokal unter `uploads/`; die Umstellung auf einen gemeinsamen Bildspeicher in Neon ist geplant. Nur gezielt `git add <datei>` nutzen.
 
 ### Wie wir arbeiten: Scrumban (nach dem RDF-Leitfaden)
 
@@ -94,7 +97,7 @@ Manche Dateien betreffen alle. Diese änderst du **nur, wenn das Teammitglied au
 ## 5. Nicht ins Repo
 
 - Secrets (Passwörter, API-Keys, `.env`)
-- Die SQLite-Datenbankdatei
+- Die lokale SQLite-Datei `laserflow.db` und die `.env` mit der Neon-Adresse
 - Hochgeladene Kundenbilder und erzeugte Produktionsdateien
 - KI-Modelldateien (z. B. das u2net-Modell, ca. 176 MB; wird beim ersten Start heruntergeladen)
 - Virtuelle Umgebungen und Caches (`.venv/`, `__pycache__/`)
@@ -106,7 +109,7 @@ Wenn eine dieser Dateien in `git status` auftaucht: nicht committen, sondern auf
 - Stories, Akzeptanzkriterien oder Prioritäten ändern (das entscheidet der Product Owner)
 - Karten auf dem Board verschieben oder Aufgaben in den Sprint holen
 - Den Tech Stack ändern oder neue Frameworks einführen
-- Externe Dienste einbauen, die die Stories ausschließen: KI-Modelle laufen auf dem eigenen Server, E-Mails ohne Cloud-Dienst (lokaler Mailserver), Bezahlung wird nur simuliert
+- Externe Dienste einbauen, die die Stories ausschließen: KI-Modelle laufen auf dem eigenen Server, E-Mails ohne Cloud-Dienst (lokaler Mailserver), Bezahlung wird nur simuliert. **Ausnahme, im Team abgestimmt (11.2026):** die gemeinsame Datenbank und der Bildspeicher bei Neon.
 
 ## 7. Fertig heißt (Definition of Done)
 
