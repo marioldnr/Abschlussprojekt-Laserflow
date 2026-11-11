@@ -18,6 +18,7 @@ Mehrfach starten ist ungefährlich: Gibt es die E-Mail schon, wird nichts angele
 
 from getpass import getpass
 
+from app import config
 from app.accounts import employee_service
 from app.accounts.service import AccountError, get_user_by_email
 from app.database import SessionLocal, init_db
@@ -55,7 +56,9 @@ def seed_first_admin(
 
 def main() -> None:
     """Fragt die Admin-Daten ab und legt den Admin an."""
-    init_db()  # Tabellen anlegen, falls laserflow.db noch nicht existiert
+    # Tabellen nur bei SQLite selbst anlegen. Bei Neon legt Alembic sie an (alembic upgrade head).
+    if config.is_sqlite():
+        init_db()
     email = input(f"E-Mail des ersten Admins [{DEFAULT_ADMIN_EMAIL}]: ").strip() or DEFAULT_ADMIN_EMAIL
     first_name = input(f"Vorname [{DEFAULT_ADMIN_FIRST_NAME}]: ").strip() or DEFAULT_ADMIN_FIRST_NAME
     last_name = input(f"Nachname [{DEFAULT_ADMIN_LAST_NAME}]: ").strip() or DEFAULT_ADMIN_LAST_NAME
