@@ -16,7 +16,6 @@ Ohne Anmeldung antworten alle mit 401 (siehe dependencies.get_current_user).
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app import config
@@ -111,11 +110,15 @@ def cancel_email_change(user: User = Depends(get_current_user), db: Session = De
 
 @router.get("/avatar")
 def get_avatar(user: User = Depends(get_current_user)):
-    """Liefert das eigene Profilbild als Bilddatei. 404, wenn es keins gibt."""
-    path = account_service.avatar_file(user)
-    if path is None:
+    """Liefert das eigene Profilbild als Bilddatei (Inhalt und Content-Type aus dem Bildspeicher).
+
+    404, wenn es kein Profilbild gibt oder die Datei im Bildspeicher fehlt.
+    """
+    image = account_service.avatar_image(user)
+    if image is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Kein Profilbild vorhanden.")
-    return FileResponse(path)
+    content, content_type = image
+    return Response(content=content, media_type=content_type)
 
 
 @router.put("/avatar", response_model=AvatarResponse)

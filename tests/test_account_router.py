@@ -154,6 +154,7 @@ def test_avatar_upload_show_remove(logged_in, tmp_path):
     assert logged_in.get("/api/auth/me").json()["avatar_url"] == url  # für das Icon oben
     image = logged_in.get(url)
     assert image.status_code == 200
+    assert image.headers["content-type"] == "image/png"  # aus der Endung, nicht geraten
     assert image.content == PNG
 
     assert logged_in.delete("/api/account/avatar").status_code == 204

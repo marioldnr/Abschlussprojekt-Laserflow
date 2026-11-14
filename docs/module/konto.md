@@ -93,7 +93,7 @@ Auch `GET /api/auth/me` liefert jetzt `avatar_url` mit, damit das Icon auf jeder
 - **Straße und Hausnummer** werden wie bei der Registrierung zusammen in `addresses.street` gespeichert und für das Formular mit `split_street()` wieder getrennt.
 - **Profilbild ohne Bildbibliothek:** Das Bild wird unverändert gespeichert und erst bei der Anzeige rund und quadratisch zugeschnitten (CSS `object-fit: cover`). Das Format wird am Dateiinhalt erkannt („Magic Bytes“), nicht am Dateinamen.
 - **Bild als Body statt Formular-Upload:** So braucht FastAPI kein Zusatzpaket (`python-multipart`).
-- **Bilder im Dateisystem** unter `uploads/avatars/<user-id>-<zufall>.<endung>`, in der Datenbank nur der Pfad. Der Zufallsteil sorgt dafür, dass der Browser nach einem Wechsel das neue Bild lädt. Das alte Bild wird beim Ersetzen gelöscht.
+- **Bilder im Bildspeicher** (siehe `bildspeicher.md`): Schlüssel `avatars/<user-id>-<zufall>.<endung>`, in der Datenbank nur dieser Schlüssel. Der Zufallsteil sorgt dafür, dass der Browser nach einem Wechsel das neue Bild lädt. Das alte Bild wird beim Ersetzen gelöscht.
 - **Login-Prüfung als gemeinsamer Baustein:** `get_current_user` in `dependencies.py` können auch andere Module (Warenkorb, Bestellungen) benutzen.
 
 ## Testen
@@ -110,5 +110,5 @@ Auch `GET /api/auth/me` liefert jetzt `avatar_url` mit, damit das Icon auf jeder
 - Ein gelöschtes Konto kann der Kunde nicht selbst wiederherstellen.
 - Das Profilbild sieht nur der Kunde selbst; eine Ansicht für Mitarbeiter fehlt noch.
 - Wer nach einem Update noch Fehler sieht, die schon behoben sind: einmal Strg + F5 (der Browser kann alte JavaScript-Dateien noch im Zwischenspeicher haben; seit `FrontendFiles` in `main.py` fragt er aber immer nach).
-- Hochgeladene Dateien liegen im Repo-Ordner unter `uploads/`. Der Ordner darf nicht committet werden (lokal in `.git/info/exclude` eintragen, bis es eine gemeinsame `.gitignore` gibt).
+- Profilbilder liegen im Neon Object Storage (siehe `bildspeicher.md`), damit alle im Team sie sehen. Ohne Bucket in der `.env` landen sie lokal unter `uploads/`; dieser Ordner steht in `.gitignore`.
 - Für „Meine Bestellungen“ im Benutzermenü gibt es noch keine Seite.

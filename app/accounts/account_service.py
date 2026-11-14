@@ -16,7 +16,7 @@ from pathlib import Path
 from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
-from app import config
+from app import config, storage
 from app.accounts import service
 from app.accounts.models import Address, User, UserSession, VerificationCode
 from app.images.models import CustomerImage
@@ -253,14 +253,26 @@ def _detect_image_type(content: bytes) -> str | None:
     return None
 
 
-def _avatar_dir() -> Path:
-    return Path(config.UPLOAD_DIR) / "avatars"
+def _delete_local_file(path: str | None) -> None:
+    """Löscht eine Kundenbild-Datei auf dem eigenen Datenträger, falls es sie gibt.
+
+    Kundenbilder liegen noch lokal (das Modul images nutzt den Bildspeicher noch nicht).
+    Deshalb löschen wir sie hier direkt. Würde man storage.delete_file nehmen, würden
+    lokale Pfade wie ``/home/.../uploads/bild.png`` still ignoriert, und das Kundenbild
+    bliebe nach dem Anonymisieren auf der Platte.
+    """
+    if path:
+        Path(path).unlink(missing_ok=True)
 
 
 def _delete_file(path: str | None) -> None:
-    """Löscht eine hochgeladene Datei, falls es sie gibt."""
-    if path:
-        Path(path).unlink(missing_ok=True)
+    """Löscht eine Datei im Bildspeicher (app/storage.py), falls es sie gibt.
+
+    Der Parameter heißt noch ``path``, es ist aber der Schlüssel der Datei (z. B.
+    ``avatars/3-abc.png``). Alte lokale Pfade aus der Zeit vor dem Bildspeicher werden
+    still ignoriert (siehe storage.delete_file).
+    """
+    storage.delete_file(path)
 
 
 def save_avatar(db: Session, user: User, content: bytes) -> User:
@@ -269,7 +281,8 @@ def save_avatar(db: Session, user: User, content: bytes) -> User:
     Das Bild wird nicht verändert. Rund und quadratisch zugeschnitten wird es nur bei der
     Anzeige (CSS ``object-fit: cover``), dafür braucht es keine Bildbibliothek.
     Der Dateiname enthält einen Zufallsteil, damit der Browser nach einem Wechsel
-    nicht das alte Bild aus dem Zwischenspeicher zeigt.
+    nicht das alte Bild aus dem Zwischenspeicher zeigt. Gespeichert wird im Bildspeicher
+    (Neon Object Storage oder lokal, siehe app/storage.py); in der Datenbank steht nur der Schlüssel.
 
     Raises:
         FieldValidationError: Datei leer, zu groß oder kein JPG/PNG/WebP (Feld "avatar").
@@ -282,13 +295,11 @@ def save_avatar(db: Session, user: User, content: bytes) -> User:
     if extension is None:
         raise service.FieldValidationError({"avatar": MSG_AVATAR_TYPE})
 
-    folder = _avatar_dir()
-    folder.mkdir(parents=True, exist_ok=True)
-    path = folder / f"{user.id}-{secrets.token_hex(8)}.{extension}"
-    path.write_bytes(content)
+    key = f"avatars/{user.id}-{secrets.token_hex(8)}.{extension}"
+    storage.save_file(key, content)
 
     old_path = user.avatar_path
-    user.avatar_path = str(path)
+    user.avatar_path = key
     db.commit()
     _delete_file(old_path)
     return user
@@ -302,12 +313,19 @@ def remove_avatar(db: Session, user: User) -> None:
     _delete_file(old_path)
 
 
-def avatar_file(user: User) -> Path | None:
-    """Pfad zur Bilddatei, wenn es ein Profilbild gibt und die Datei existiert."""
+def avatar_image(user: User) -> tuple[bytes, str] | None:
+    """Inhalt und Content-Type des Profilbilds, wenn es eines gibt und die Datei existiert.
+
+    Returns:
+        (Bytes des Bildes, Content-Type z. B. ``image/png``), oder None, wenn kein Profilbild
+        gesetzt ist oder die Datei im Bildspeicher fehlt.
+    """
     if not user.avatar_path:
         return None
-    path = Path(user.avatar_path)
-    return path if path.is_file() else None
+    content = storage.read_file(user.avatar_path)
+    if content is None:
+        return None
+    return content, storage.content_type_for(user.avatar_path)
 
 
 # --------------------------------------------------------------------------- Konto löschen
@@ -408,7 +426,7 @@ def _anonymize(db: Session, user: User) -> None:
     for image in db.scalars(select(CustomerImage).where(CustomerImage.user_id == user.id)).all():
         if image.id not in ordered_image_ids:
             for path in (image.original_path, image.background_removed_path, image.processed_path):
-                _delete_file(path)
+                _delete_local_file(path)
             db.delete(image)
 
     db.execute(delete(Address).where(Address.user_id == user.id))
