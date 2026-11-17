@@ -42,8 +42,10 @@ Besucher legen ein Kundenkonto an (Registrieren), bestätigen ihre E-Mail-Adress
 | `app/accounts/validation.py` | Prüfregeln wie im Frontend, mit denselben deutschen Meldungen |
 | `app/accounts/schemas.py` | Form der Anfragen und Antworten (Pydantic) |
 | `app/accounts/models.py` | Tabellen `users`, `verification_codes`, `addresses`, `sessions` |
-| `app/mail.py` | E-Mail-Versand (gemeinsamer Baustein): Terminal oder lokaler Mailserver |
-| `app/config.py` | Code-Gültigkeit, Fehlversuche, Cookie, Mail-Einstellungen |
+| `app/mail.py` | E-Mail-Versand (gemeinsamer Baustein): über das Gmail-Konto des Teams oder, ohne Zugangsdaten, nur im Terminal |
+| `app/config.py` | Code-Gültigkeit, Fehlversuche, Cookie, Mail-Einstellungen (aus der `.env`) |
+| `.env.example` | Vorlage für die eigene `.env`, Abschnitt „E-Mail-Versand“ |
+| `tests/test_mail.py` | Tests für den Versand, ohne echtes Senden (Mailserver wird simuliert) |
 | `tests/test_accounts_service.py` | Tests der Logik |
 | `tests/test_accounts_router.py` | Tests über HTTP (ganzer Ablauf), braucht `httpx` |
 
@@ -53,7 +55,7 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 
 **Registrieren**
 
-1. Eingaben werden im Browser geprüft: Pflichtfelder, E-Mail-Format, Name, Adresse auf Plausibilität (Straße mit Hausnummer, PLZ mit 5 Ziffern, Ort), Passwortstärke, Übereinstimmung der Passwörter, Zustimmung zu AGB und Datenschutz. Fehler: Feld rot, Meldung darunter (z. B. „Das Passwort muss mindestens einen Buchstaben und eine Ziffer enthalten.“).
+1. Eingaben werden im Browser geprüft: Pflichtfelder, E-Mail-Format, Name, Adresse auf Plausibilität (Straße nur aus Buchstaben, Hausnummer aus Ziffern und höchstens einem Buchstaben, PLZ mit 5 Ziffern, Ort), Passwortstärke, Übereinstimmung der Passwörter, Zustimmung zu AGB und Datenschutz. Fehler: Feld rot, Meldung darunter (z. B. „Das Passwort muss mindestens einen Buchstaben und eine Ziffer enthalten.“).
    - Die Links „AGB“ und „Datenschutzerklärung“ in der Checkbox öffnen ein Popup mit dem jeweiligen Text (siehe „AGB und Datenschutz (Popup)“ unten). Das Schließen hakt die Checkbox nicht an.
 2. `POST /api/auth/register`: Das Backend prüft alles noch einmal (`validation.py`), schreibt die E-Mail klein, legt das Konto (noch nicht bestätigt) und die Adresse als Lieferadresse an, speichert das Passwort als scrypt-Hash und schickt einen 4-stelligen Code per E-Mail.
 3. Fehler vom Backend erscheinen ebenfalls am Feld: E-Mail schon vergeben (409) bzw. Feldfehler (422).
@@ -118,7 +120,10 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - **Gleiche Meldung bei falscher E-Mail und falschem Passwort**, „Code erneut senden“ antwortet immer mit 204, „Konto nicht bestätigt“ kommt erst nach dem richtigen Passwort: So kann niemand herausfinden, welche E-Mail-Adressen registriert sind.
 - **E-Mail wird kleingeschrieben gespeichert**, damit `Anna@…` und `anna@…` nicht zwei Konten werden.
 - **Prüfregeln doppelt (Browser und Backend):** Browser-Prüfungen kann man umgehen. Wer eine Regel ändert, ändert sie in `validation.js` und `validation.py`.
-- **E-Mails im Terminal** (`MAIL_MODE = "console"`): Beim Entwickeln steht der Code im Terminal, in dem uvicorn läuft. Für einen lokalen Mailserver `MAIL_MODE = "smtp"` setzen. Laut Vorgaben kein Cloud-Dienst.
+- **E-Mail-Versand über das Gmail-Konto des Teams** (Team-Entscheidung 10.11.2026): SMTP über `smtp.gmail.com`, Port 587 (verschlüsselt mit STARTTLS), Anmeldung mit einem App-Passwort, nicht dem normalen Gmail-Passwort. Kappt das Netz Port 587, versucht `mail.py` einmal Port 465 (SSL). Über Google laufen nur E-Mail-Adresse, Vorname und Code.
+- **Zugangsdaten nur in der eigenen `.env`** (`LASERFLOW_SMTP_USER`, `LASERFLOW_SMTP_PASSWORD`), gelesen wie die Datenbank-Adresse über `python-dotenv`. Ohne sie gilt `MAIL_MODE = "console"`: Die Mail steht nur im Terminal, alles lässt sich trotzdem testen.
+- **Fehlschlag bricht nichts ab:** Scheitert der Versand, steht die Mail mit `VERSAND FEHLGESCHLAGEN: Schritt '…'` im Terminal (Verbinden, Verschlüsselung, Anmeldung oder Senden), und die Registrierung läuft weiter.
+- **Tests verschicken nie echte Mails:** `tests/conftest.py` setzt `LASERFLOW_MAIL_MODE=console`.
 - **Name und Adresse bei der Registrierung:** Das Wireframe zeigt nur E-Mail und Passwort, der Use Case „Registrieren“ verlangt aber „Adresse auf Plausibilität prüfen“. Die Adresse wird als Lieferadresse (`type = "shipping"`) gespeichert.
 - **Straße und Hausnummer: zwei Felder im Formular, eine Spalte in der Datenbank.** Getrennte Felder, damit jedes seine eigene Prüfung und Fehlermeldung hat. Straße: nur Buchstaben, zwischen Wörtern ein Leerzeichen oder Bindestrich („Am Ring“, „Karl-Marx-Straße“). Hausnummer: 1–4 Ziffern, danach höchstens ein Buchstabe („12“, „12a“). Gespeichert wird beides zusammen in `addresses.street` („Musterstraße 12“), so wie es das Datenmodell festlegt (`CLAUDE.md`, Abschnitt Datenbank); eine Model-Änderung war dafür nicht nötig.
 - **Passwortregel:** mindestens 8 Zeichen, mindestens ein Buchstabe und eine Ziffer (Backend zusätzlich höchstens 128 Zeichen).
@@ -135,7 +140,8 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 
 - Backend: im Repo-Ordner `pytest`. Die Endpunkt-Tests (`test_accounts_router.py`) brauchen `httpx` (`pip install httpx`), sonst werden sie übersprungen.
 - Frontend-Module: im Ordner `frontend/` `npm test` (Node.js ab Version 20, keine Pakete nötig).
-- Von Hand: `uvicorn app.main:app --reload` starten, `http://127.0.0.1:8000/registrieren.html` öffnen, registrieren, den Code aus dem Terminal abschreiben. Über Live Server funktioniert nur die Prüfung im Browser („Der Server ist gerade nicht erreichbar“).
+- Von Hand: `uvicorn app.main:app --reload` starten, `http://127.0.0.1:8000/registrieren.html` öffnen, registrieren. Mit Gmail-Zugangsdaten in der `.env` kommt der Code per E-Mail, sonst steht er im Terminal.
+- Echten Versand einrichten: In der eigenen `.env` `LASERFLOW_SMTP_USER` und `LASERFLOW_SMTP_PASSWORD` eintragen (Vorlage `.env.example`), uvicorn neu starten. Über Live Server funktioniert nur die Prüfung im Browser („Der Server ist gerade nicht erreichbar“).
 - Nach der Änderung an den Tabellen einmal `laserflow.db` löschen, sonst fehlen die neue Tabelle `sessions` und die Spalte `failed_attempts`.
 - AGB-/Datenschutz-Popup: automatische Tests in `frontend/tests/agb-dialog.test.js` (mit Ersatz-Elementen, weil Node keinen Browser hat). Zusätzlich von Hand im Browser:
   1. „AGB“ anklicken: Popup öffnet, Überschrift und Text stimmen.
@@ -148,7 +154,9 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 
 ## Bekannte Grenzen
 
-- Der lokale Mailserver ist noch nicht eingerichtet. Mit `MAIL_MODE = "smtp"` und ohne laufenden Server schlägt die Registrierung mit einem Serverfehler fehl (das Konto ist dann angelegt, der Code kann über „Code erneut senden“ neu angefordert werden).
+- Schlägt der echte Versand fehl, sieht der Kunde das nicht: Die Seite meldet „Code geschickt“, die Mail steht aber nur im Terminal.
+- Gmail begrenzt die Zahl der Mails pro Tag (einige hundert). Für das Projekt reicht das.
+- Ein Gmail-Absender wirkt nicht wie ein Firmenabsender; Mails können im Spam landen.
 - „Code erneut senden“ ist nicht begrenzt (man könnte viele E-Mails auslösen).
 - Abgelaufene Sitzungen werden erst gelöscht, wenn jemand sie benutzt.
 - Wer sich mit einer falschen E-Mail-Adresse registriert, kann sie nicht ändern, sondern muss sich neu registrieren; das falsche, unbestätigte Konto bleibt bestehen.
