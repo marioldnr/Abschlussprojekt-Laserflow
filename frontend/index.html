@@ -19,7 +19,9 @@
 
   <!-- Nur für diese Seite -->
   <link rel="stylesheet" href="css/startseite.css">
+  <link rel="stylesheet" href="css/shop.css">
   <script src="js/startseite.js" defer></script>
+  <script type="module" src="js/startseite-produkte.js"></script>
 </head>
 <body>
 
@@ -93,7 +95,7 @@
             (Platzhaltertext – wird noch ersetzt.)
           </p>
           <div class="button-row">
-            <a href="#produkte" class="button">Produkte entdecken</a>
+            <a href="katalog.html" class="button">Produkte entdecken</a>
             <a href="#so-gehts" class="button button-ghost">So funktioniert's</a>
           </div>
         </div>
@@ -136,36 +138,21 @@
         <div class="section-head reveal">
           <p class="eyebrow">Katalog</p>
           <h2>Unsere Produkte</h2>
-          <p class="section-intro">Platzhalter – die echten Produkte kommen später aus dem Katalog.</p>
+          <p class="section-intro">Lasergeschnitten und graviert in unserer Werkstatt.</p>
         </div>
 
-        <div class="tiles">
-          <a href="#" class="tile reveal">
-            <div class="tile-image"><span>Bild</span></div>
-            <div class="tile-body">
-              <h3>Schneidebrett</h3>
-              <span class="tile-cta">Jetzt gestalten →</span>
+        <!-- Die Produktkacheln setzt js/startseite-produkte.js aus den Produktdaten ein (vor die Katalog-Kachel). -->
+        <div class="tiles" id="home-products">
+          <a href="katalog.html" class="tile tile-more reveal reveal-delay-3">
+            <div class="tile-image">
+              <span>
+                <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                Ganzer Katalog
+              </span>
             </div>
-          </a>
-          <a href="#" class="tile reveal reveal-delay">
-            <div class="tile-image"><span>Bild</span></div>
             <div class="tile-body">
-              <h3>Fotorahmen</h3>
-              <span class="tile-cta">Jetzt gestalten →</span>
-            </div>
-          </a>
-          <a href="#" class="tile reveal reveal-delay-2">
-            <div class="tile-image"><span>Bild</span></div>
-            <div class="tile-body">
-              <h3>Schlüsselanhänger</h3>
-              <span class="tile-cta">Jetzt gestalten →</span>
-            </div>
-          </a>
-          <a href="#" class="tile reveal reveal-delay-3">
-            <div class="tile-image"><span>Bild</span></div>
-            <div class="tile-body">
-              <h3>Telefonbox</h3>
-              <span class="tile-cta">Ansehen →</span>
+              <h3>Alle Produkte</h3>
+              <span class="tile-cta">Zum Katalog →</span>
             </div>
           </a>
         </div>
