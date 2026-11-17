@@ -31,7 +31,8 @@ Wir sind ein 3er-Team, das parallel am selben Repo arbeitet, jeder mit Claude. D
 - **Feste Entscheidungen, nicht „reparieren“:** Preise in Cent (`int`), Maße in mm, nur Dateipfade in der DB, Löschen nur per Flag (`is_active`, `is_hidden`, `anonymized_at`), Adresse und Stückpreis werden in die Bestellung kopiert, Straße mit Hausnummer in einem Feld und PLZ als `postal_code` (wie im Registrierungsformular), Status-Werte als Text (erlaubte Werte im Docstring, Prüfung im Service). Fremdschlüssel über Tabellennamen, z. B. `ForeignKey("users.id")`.
 - **Tests:** Die Fixture `db` aus `tests/conftest.py` liefert pro Test eine leere Datenbank im Arbeitsspeicher. `tests/conftest.py` stellt die App für Tests auf eine Wegwerf-SQLite-Datei um, Tests laufen also nie gegen Neon oder `laserflow.db`.
 - **Erster Admin:** `python -m scripts.seed_db` legt ihn in der Datenbank an, auf die die `.env` zeigt. Mit Neon reicht das einmal für das ganze Team.
-- **Offen:** US02 Bestätigung per Code oder Link (Spalte `code` passt für beides). Bilder (Profilbilder, später Produktbilder) liegen noch lokal unter `uploads/`; die Umstellung auf einen gemeinsamen Bildspeicher in Neon ist geplant. Nur gezielt `git add <datei>` nutzen.
+- **Entschieden:** US02 Bestätigung per 4-stelligem Code per E-Mail (nicht per Link).
+- **Offen:** Bilder (Profilbilder, später Produktbilder) liegen noch lokal unter `uploads/`; die Umstellung auf einen gemeinsamen Bildspeicher in Neon ist geplant. Nur gezielt `git add <datei>` nutzen.
 
 ### Wie wir arbeiten: Scrumban (nach dem RDF-Leitfaden)
 
@@ -109,7 +110,7 @@ Wenn eine dieser Dateien in `git status` auftaucht: nicht committen, sondern auf
 - Stories, Akzeptanzkriterien oder Prioritäten ändern (das entscheidet der Product Owner)
 - Karten auf dem Board verschieben oder Aufgaben in den Sprint holen
 - Den Tech Stack ändern oder neue Frameworks einführen
-- Externe Dienste einbauen, die die Stories ausschließen: KI-Modelle laufen auf dem eigenen Server, E-Mails ohne Cloud-Dienst (lokaler Mailserver), Bezahlung wird nur simuliert. **Ausnahme, im Team abgestimmt (11.2026):** die gemeinsame Datenbank und der Bildspeicher bei Neon.
+- Externe Dienste einbauen, die die Stories ausschließen: KI-Modelle laufen auf dem eigenen Server, Bezahlung wird nur simuliert. **Ausnahmen, im Team abgestimmt (11.2026):** die gemeinsame Datenbank und der Bildspeicher bei Neon sowie der E-Mail-Versand über das Gmail-Konto des Teams (SMTP mit App-Passwort, `app/mail.py`). Zugangsdaten stehen nur in der eigenen `.env`; ohne sie erscheinen E-Mails im Terminal.
 
 ## 7. Fertig heißt (Definition of Done)
 
