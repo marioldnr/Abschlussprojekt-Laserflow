@@ -15,6 +15,8 @@ os.environ["DATABASE_URL"] = "sqlite:///" + os.path.join(tempfile.mkdtemp(), "te
 # Tests nutzen nie den Neon-Bildspeicher, auch wenn die eigene .env einen Bucket enthält
 # (load_dotenv überschreibt schon gesetzte Variablen nicht).
 os.environ["STORAGE_BUCKET"] = ""
+# Tests verschicken nie echte E-Mails, auch wenn die eigene .env Gmail-Zugangsdaten enthält.
+os.environ["LASERFLOW_MAIL_MODE"] = "console"
 
 import pytest  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402

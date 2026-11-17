@@ -100,9 +100,34 @@ STORAGE_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "").strip().strip
 
 # --- E-Mail-Versand (app/mail.py) ---
 
-# "console": E-Mails werden nur im Terminal ausgegeben (zum Entwickeln, kein Mailserver nötig).
-# "smtp":    E-Mails gehen an einen lokalen Mailserver (SMTP_HOST, SMTP_PORT).
-MAIL_MODE = "console"
-SMTP_HOST = "localhost"
-SMTP_PORT = 1025
-MAIL_SENDER = "LaserFlow <noreply@laserflow.local>"
+# Versand über das Gmail-Konto des Teams (Team-Entscheidung 10.11.2026).
+# Adresse und App-Passwort stehen in der eigenen .env (Vorlage: .env.example), nie im Code.
+# Ohne sie landen E-Mails nur im Terminal; so kann jedes Teammitglied auch ohne
+# Zugangsdaten weiterarbeiten.
+
+
+def _env(name: str, default: str = "") -> str:
+    """Liest eine Umgebungsvariable ohne Leerzeichen und Anführungszeichen drumherum."""
+    return os.getenv(name, default).strip().strip('"').strip("'")
+
+
+def default_mail_mode(user: str, password: str) -> str:
+    """Echter Versand nur, wenn Adresse UND App-Passwort da sind, sonst Ausgabe im Terminal."""
+    return "smtp" if user and password else "console"
+
+
+SMTP_HOST = _env("LASERFLOW_SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(_env("LASERFLOW_SMTP_PORT", "587") or "587")  # 587 = verschlüsselt per STARTTLS
+SMTP_USER = _env("LASERFLOW_SMTP_USER")
+# Google zeigt das App-Passwort in 4er-Gruppen mit Leerzeichen an; die Leerzeichen gehören nicht dazu.
+SMTP_PASSWORD = _env("LASERFLOW_SMTP_PASSWORD").replace(" ", "")
+SMTP_TIMEOUT_SECONDS = 15
+
+# Gmail verschickt nur im Namen des angemeldeten Kontos, deshalb ist der Absender dessen Adresse.
+MAIL_SENDER = f"LaserFlow <{SMTP_USER}>" if SMTP_USER else "LaserFlow <noreply@laserflow.local>"
+
+# "smtp":    E-Mails gehen wirklich raus (über SMTP_HOST mit SMTP_USER/SMTP_PASSWORD).
+# "console": E-Mails werden nur im Terminal ausgegeben, in dem uvicorn läuft.
+# Standard: "smtp", wenn Adresse und Passwort in der .env stehen, sonst "console".
+# Mit LASERFLOW_MAIL_MODE=console in der .env lässt sich der echte Versand abschalten.
+MAIL_MODE = _env("LASERFLOW_MAIL_MODE") or default_mail_mode(SMTP_USER, SMTP_PASSWORD)
