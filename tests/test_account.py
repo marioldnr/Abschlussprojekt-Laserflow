@@ -222,21 +222,32 @@ def test_email_change_resend_code(db, user, sent_mails):
 # ------------------------------------------------------------------ Profilbild
 
 
-@pytest.mark.parametrize(("content", "extension"), [(PNG, "png"), (JPG, "jpg"), (WEBP, "webp")])
-def test_save_avatar(db, user, upload_dir, content, extension):
+@pytest.mark.parametrize(
+    ("content", "extension", "content_type"),
+    [(PNG, "png", "image/png"), (JPG, "jpg", "image/jpeg"), (WEBP, "webp", "image/webp")],
+)
+def test_save_avatar(db, user, upload_dir, content, extension, content_type):
     account_service.save_avatar(db, user, content)
-    path = account_service.avatar_file(user)
-    assert path is not None and path.suffix == f".{extension}"
-    assert path.parent == upload_dir / "avatars"
-    assert path.read_bytes() == content
+    # In der Datenbank steht nur der Schlüssel, nicht der volle Pfad
+    assert user.avatar_path.startswith(f"avatars/{user.id}-")
+    assert user.avatar_path.endswith(f".{extension}")
+    assert (upload_dir / user.avatar_path).read_bytes() == content  # lokal liegt die Datei unter UPLOAD_DIR
+    assert account_service.avatar_image(user) == (content, content_type)
 
 
-def test_new_avatar_replaces_old_file(db, user):
+def test_new_avatar_replaces_old_file(db, user, upload_dir):
     account_service.save_avatar(db, user, PNG)
-    old = account_service.avatar_file(user)
+    old = upload_dir / user.avatar_path
     account_service.save_avatar(db, user, JPG)
     assert not old.exists()
-    assert account_service.avatar_file(user).suffix == ".jpg"
+    assert user.avatar_path.endswith(".jpg")
+    assert account_service.avatar_image(user)[1] == "image/jpeg"
+
+
+def test_avatar_image_is_none_when_file_is_missing(db, user):
+    user.avatar_path = "avatars/1-fehlt.png"  # Eintrag ohne Datei
+    db.commit()
+    assert account_service.avatar_image(user) is None
 
 
 @pytest.mark.parametrize(
@@ -259,13 +270,13 @@ def test_save_avatar_size_limit(db, user, monkeypatch):
     assert "höchstens" in error.value.errors["avatar"]
 
 
-def test_remove_avatar(db, user):
+def test_remove_avatar(db, user, upload_dir):
     account_service.save_avatar(db, user, PNG)
-    path = account_service.avatar_file(user)
+    path = upload_dir / user.avatar_path
     account_service.remove_avatar(db, user)
     assert user.avatar_path is None
     assert not path.exists()
-    assert account_service.avatar_file(user) is None
+    assert account_service.avatar_image(user) is None
 
 
 # ------------------------------------------------------------------ Konto löschen (Akzeptanzkriterien US10)
@@ -305,9 +316,9 @@ def assert_anonymized(db, user):
     assert db.query(UserSession).filter_by(user_id=user.id).count() == 0
 
 
-def test_delete_without_orders_logs_out_and_anonymizes_immediately(db, user):
+def test_delete_without_orders_logs_out_and_anonymizes_immediately(db, user, upload_dir):
     account_service.save_avatar(db, user, PNG)
-    avatar = account_service.avatar_file(user)
+    avatar = upload_dir / user.avatar_path
     token = service.create_session(db, user)
 
     assert account_service.delete_account(db, user, PASSWORD) is True

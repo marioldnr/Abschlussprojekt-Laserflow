@@ -85,6 +85,19 @@ UPLOAD_DIR = "./uploads"
 # Profilbild: größte erlaubte Dateigröße (5 MB).
 AVATAR_MAX_BYTES = 5 * 1024 * 1024
 
+# --- Bildspeicher (app/storage.py) ---
+
+# Neon Object Storage ist ein Speicher für Dateien in der Cloud, angesprochen wie Amazon S3.
+# Das Team teilt die Datenbank, aber nicht den Ordner uploads/. Liegen die Bilder im
+# Object Storage, sieht sie jedes Teammitglied. Die Werte kommen aus der .env (Neon-Console:
+# "Connect" -> Reiter "Storage" -> "Parameters only"). Die Namen AWS_* sind die, die Neon dort
+# anzeigt. Ohne STORAGE_BUCKET legt die App die Dateien lokal unter UPLOAD_DIR ab.
+STORAGE_BUCKET = os.getenv("STORAGE_BUCKET", "").strip().strip('"').strip("'")
+STORAGE_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL_S3", "").strip().strip('"').strip("'")
+STORAGE_REGION = os.getenv("AWS_REGION", "").strip().strip('"').strip("'")
+STORAGE_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "").strip().strip('"').strip("'")
+STORAGE_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "").strip().strip('"').strip("'")
+
 # --- E-Mail-Versand (app/mail.py) ---
 
 # "console": E-Mails werden nur im Terminal ausgegeben (zum Entwickeln, kein Mailserver nötig).

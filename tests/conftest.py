@@ -12,6 +12,9 @@ import tempfile
 # Adresse hart auf eine SQLite-Datei in einem temporären Ordner gesetzt (nicht setdefault:
 # eine schon gesetzte Variable aus der Umgebung soll Tests nicht umlenken).
 os.environ["DATABASE_URL"] = "sqlite:///" + os.path.join(tempfile.mkdtemp(), "test.db")
+# Tests nutzen nie den Neon-Bildspeicher, auch wenn die eigene .env einen Bucket enthält
+# (load_dotenv überschreibt schon gesetzte Variablen nicht).
+os.environ["STORAGE_BUCKET"] = ""
 
 import pytest  # noqa: E402
 from sqlalchemy import create_engine  # noqa: E402
