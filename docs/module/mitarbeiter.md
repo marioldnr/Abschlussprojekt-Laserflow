@@ -27,7 +27,8 @@ Die Formular-Bausteine (Prüfregeln, Fehleranzeige, Anfragen ans Backend) kommen
 
 | Datei | Aufgabe |
 | --- | --- |
-| `app/accounts/employee_router.py` | Endpunkte `/api/admin/employees`, Prüfung „nur Admin“ (`require_admin`). Die Anmeldung prüft `get_current_user` aus `app/accounts/dependencies.py` (gemeinsam für alle Module) |
+| `app/accounts/employee_router.py` | Endpunkte `/api/admin/employees`. Nutzt `require_admin` aus `app/accounts/dependencies.py` |
+| `app/accounts/dependencies.py` | Gemeinsamer Baustein für alle Module: Anmeldung (`get_current_user`) und Rollenprüfung (`require_roles`, `require_employee`, `require_admin`) |
 | `app/accounts/employee_service.py` | Logik: anlegen, auflisten, holen, ändern, letzten Admin schützen, deaktivieren |
 | `app/accounts/employee_schemas.py` | Form der Anfragen und Antworten (Pydantic) |
 | `scripts/seed_db.py` | Legt den ersten Admin an (`seed_first_admin()`), damit die Maske überhaupt benutzbar ist |
@@ -39,6 +40,7 @@ Die Formular-Bausteine (Prüfregeln, Fehleranzeige, Anfragen ans Backend) kommen
 | --- | --- |
 | `tests/test_employee_service.py` | Tests der Logik (Normalfall, ungültige Eingaben, Grenzfälle) |
 | `tests/test_employee_router.py` | Tests über HTTP: Zugriff nur für Admins, Statuscodes. Braucht `httpx` |
+| `tests/test_dependencies.py` | Tests der Rollenprüfung über HTTP: 401 ohne Anmeldung, 403 bei falscher Rolle, Admin mit allen Mitarbeiterrechten. Braucht `httpx` |
 
 Die Fehlerklassen (`EmployeeNotFoundError`, `LastAdminError`, `EmployeeInactiveError`) stehen in `employee_service.py`. Der Router wandelt sie über ihren `status_code` in HTTP-Antworten um. Ungültige Eingaben melden Service und Router als `FieldValidationError` (422, Meldung pro Feld), dieselbe Klasse wie bei der Registrierung.
 
@@ -89,6 +91,46 @@ Mitarbeiter: `{ id, email, first_name, last_name, role, is_active }`, nie der Pa
 Rollen: `employee` (Mitarbeiter) und `admin`. Andere Werte gibt es hier nicht (`customer` wird abgelehnt).
 Fehlerantworten im FastAPI-Format `{ "detail": ... }`. Bei `422` ist `detail` eine Liste `[{ "loc": ["body", "<feld>"], "msg": "..." }]`, wie bei der Registrierung.
 
+## Rollen und Rechte
+
+Jedes Konto hat genau eine Rolle (`users.role`). Die Prüfung liegt zentral in `app/accounts/dependencies.py`, nicht in den einzelnen Routern.
+
+| Rolle | Wert | Was sie darf (Ist-Stand) |
+| --- | --- | --- |
+| Kunde | `customer` | Registrieren, Anmelden, „Mein Konto“ (`/api/account/...`). Keine Mitarbeiterfunktionen. |
+| Mitarbeiter | `employee` | Alles, was mit `require_employee` geschützt ist. Bisher hängt daran noch kein Endpunkt. Mitarbeiterfunktionen (z. B. Produkte, Bestellungen) folgen mit ihren Modulen. |
+| Admin | `admin` | Alles, was ein Mitarbeiter darf (`require_employee` nennt `admin` ausdrücklich). Zusätzlich Mitarbeiter verwalten (`/api/admin/employees`, `require_admin`). |
+
+**Antworten der Prüfung**
+
+- `401` mit `{"detail": "Bitte melde dich an."}`: niemand ist angemeldet (oder die Sitzung ist abgelaufen).
+- `403` mit `{"detail": "..."}`: angemeldet, aber die Rolle ist nicht erlaubt. Die Meldung hängt von der Abhängigkeit ab: `MSG_EMPLOYEE_ONLY` („Diese Funktion ist nur für Mitarbeiter.“) bzw. `MSG_ADMIN_ONLY` („Diese Seite ist nur für Admins.“).
+
+**Benutzung in einem neuen Router**
+
+```python
+from fastapi import APIRouter, Depends
+
+from app.accounts.dependencies import require_employee
+from app.accounts.models import User
+
+router = APIRouter(prefix="/api/example", tags=["Beispiel (Mitarbeiter)"])
+
+
+@router.get("")
+def list_items(user: User = Depends(require_employee)):
+    ...  # läuft nur für angemeldete Mitarbeiter und Admins
+```
+
+Für einen Admin-Endpunkt: `Depends(require_admin)`. Der Router wird wie üblich in `app/main.py` vor `app.mount("/", …)` eingebunden.
+
+**Warum eine Fabrik `require_roles` an einer Stelle**
+
+- Der Server prüft jede Anfrage (US03). Eine Regel, die nur im Browser versteckt wird, schützt nichts.
+- Alle Rollenregeln laufen über eine Funktion. So baut niemand eine eigene Prüfung nach, die später abweicht.
+- Der Admin wird in jeder Regel ausdrücklich mit aufgezählt. Ein Admin hat nicht automatisch alle Rechte, nur weil er „höher“ ist. Wer ihm ein neues Recht geben will, schreibt es hin.
+- Ohne Rolle (`require_roles()`) bricht der Aufbau mit `ValueError` ab, damit ein vergessenes Argument beim Start auffällt und nicht erst bei einer Anfrage.
+
 ## Bewusste Entscheidungen
 
 - **Eigene Dateien `employee_*` statt Erweiterung von `service.py`/`router.py`:** So ändern US15 und die Registrierung (US02/US03) dieselben Dateien nicht gleichzeitig.
@@ -98,12 +140,12 @@ Fehlerantworten im FastAPI-Format `{ "detail": ... }`. Bei `422` ist `detail` ei
 - **Die Seite liegt flach unter `frontend/` statt unter `admin/`:** `navigation.js` baut Links relativ (z. B. `anmelden.html`). In einem Unterordner würden sie nicht mehr stimmen.
 - **Deaktivierte Mitarbeiter werden wie gelöschte Kunden anonymisiert (PO-Entscheidung 20.10.2026):** Beim Start der App läuft `anonymize_pending_accounts()` (`app/accounts/account_service.py`, aufgerufen aus `app/main.py`). Sie anonymisiert jedes deaktivierte Konto ohne laufende Bestellung: E-Mail wird zu `geloescht-<id>@anonymisiert.invalid`, Vor- und Nachname werden leer (`None`), der Passwort-Hash wird ungültig. Die Zeile in `users` bleibt erhalten. Das passt zu „Deaktivieren ist endgültig“.
 - **Passwort beim Bearbeiten optional:** Leer = bleibt. So muss der Admin das Passwort nicht jedes Mal neu eingeben.
-- **Zugriff nur über das Backend geprüft:** `require_admin` antwortet Kunden und Mitarbeitern mit `403`, nicht angemeldeten Besuchern mit `401`. Das Verstecken der Maske im Browser ist nur Komfort.
+- **Zugriff nur über das Backend geprüft:** `require_admin` (in `app/accounts/dependencies.py`) antwortet Kunden und Mitarbeitern mit `403`, nicht angemeldeten Besuchern mit `401`. Das Verstecken der Maske im Browser ist nur Komfort.
 - **Anlegen über das Backend mit der gleichen Prüfung wie bei der Registrierung:** Prüfregeln für E-Mail, Name und Passwort kommen aus `app/accounts/validation.py`.
 
 ## Testen
 
-- Backend: `pytest tests/test_employee_service.py tests/test_employee_router.py` (die Router-Tests brauchen `httpx`, sonst werden sie übersprungen). Der volle Lauf: `pytest`.
+- Backend: `pytest tests/test_employee_service.py tests/test_employee_router.py tests/test_dependencies.py` (die Router-Tests brauchen `httpx`, sonst werden sie übersprungen). Der volle Lauf: `pytest`.
 - Frontend: `npm test` im Ordner `frontend/` (Node.js ab Version 20). Dieses Modul hat keine eigenen Frontend-Tests. Die Prüfregeln (`validation.js`), der API-Client (`api-client.js`) und die Weiterleitung (`navigation.js`) haben Tests.
 - Von Hand: `uvicorn app.main:app --reload` starten, mit dem Admin aus `scripts/seed_db.py` anmelden, `http://127.0.0.1:8000/mitarbeiter.html` öffnen. Dann prüfen: Mitarbeiter anlegen, in der Liste sehen, bearbeiten, deaktivieren (Stift und Bearbeiten-Modus verschwinden). Mit einem Mitarbeiter-Konto `mitarbeiter.html` aufrufen: Die Seite zeigt nur den Hinweis „Diese Seite ist nur für Admins.“.
 - Nach Änderungen an den Tabellen `laserflow.db` löschen und `python -m scripts.seed_db` erneut ausführen.
