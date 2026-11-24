@@ -1,8 +1,8 @@
 """Endpunkte für US15: Mitarbeiteraccounts verwalten (/api/admin/employees).
 
 Alle Endpunkte sind nur für angemeldete Admins. Die Abhängigkeit ``require_admin``
-prüft die Rolle "admin"; die Anmeldung selbst prüft ``get_current_user`` aus
-app/accounts/dependencies.py (gemeinsamer Baustein für alle Module).
+kommt aus app/accounts/dependencies.py (gemeinsamer Baustein für alle Module) und prüft
+die Rolle "admin"; die Anmeldung selbst prüft dort ``get_current_user``.
 
     GET  /api/admin/employees        alle Mitarbeiter und Admins     200 / 401 / 403
     POST /api/admin/employees        Mitarbeiter anlegen             201 / 401 / 403 / 409 / 422
@@ -17,35 +17,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.accounts import employee_service, service
-from app.accounts.dependencies import get_current_user
+from app.accounts.dependencies import require_admin
 from app.accounts.employee_schemas import EmployeeCreateRequest, EmployeeResponse, EmployeeUpdateRequest
 from app.accounts.models import User
 from app.database import get_db
 
 router = APIRouter(prefix="/api/admin/employees", tags=["Mitarbeiter verwalten (Admin)"])
-
-MSG_ADMIN_ONLY = "Diese Seite ist nur für Admins."
-
-
-def require_admin(user: User = Depends(get_current_user)) -> User:
-    """Lässt nur angemeldete Admins durch (Akzeptanzkriterium: Mitarbeiter haben keinen Zugriff).
-
-    Wird per ``Depends(require_admin)`` an jeden Endpunkt gehängt.
-
-    Warum ``get_current_user`` und keine eigene Cookie-Prüfung: Die Anmeldung wird an einer
-    Stelle geprüft, und zwar für alle Module gleich. Ändert sich etwas an der Sitzung
-    (Ablauf, deaktiviertes Konto), wirkt das überall. Hier wird nur noch die Rolle geprüft.
-
-    Returns:
-        der angemeldete Admin.
-
-    Raises:
-        HTTPException 401: niemand angemeldet (kommt von get_current_user).
-        HTTPException 403: angemeldet, aber nicht Admin (Kunde oder Mitarbeiter).
-    """
-    if user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=MSG_ADMIN_ONLY)
-    return user
 
 
 def _http_error(error: service.AccountError) -> HTTPException:
