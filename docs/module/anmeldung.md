@@ -164,5 +164,5 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü führen noch auf `#`.
 - Der Warenkorb-Zähler im Kopfbereich weiß noch nichts von der Anmeldung.
 - In AGB und Datenschutzerklärung sind einige Punkte noch „[noch offen]“ (siehe „Bewusste Entscheidungen“).
-- Die Datenschutzerklärung beschreibt seit der Umstellung auf Neon (#57, #59) Hosting und Speicherung bei Neon (Frankfurt) sowie Sitzungs-Cookie und Warenkorb im Browser. Offen ist noch die Prüfung von Auftragsverarbeitungsvertrag und möglicher Übermittlung in die USA. Ändert sich, wo Daten liegen oder welche Cookies gesetzt werden, muss `datenschutz.html` mitgeändert werden.
+- Die Datenschutzerklärung beschreibt Hosting und Speicherung bei Neon (Frankfurt, #57, #59), den E-Mail-Versand über das Gmail-Konto des Teams (#61) sowie Sitzungs-Cookie und Warenkorb im Browser. Offen ist noch die Prüfung der Auftragsverarbeitungsverträge und einer möglichen Übermittlung in die USA. Ändert sich, wo Daten liegen oder welche Cookies gesetzt werden, muss `datenschutz.html` mitgeändert werden.
 - Die Seiten laden Schriften von Google Fonts; die IP-Adresse geht dabei an Google. Das steht in der Datenschutzerklärung; ob die Schriften lokal eingebunden werden, entscheidet das Team.
