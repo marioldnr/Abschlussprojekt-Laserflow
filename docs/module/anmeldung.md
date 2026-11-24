@@ -170,6 +170,7 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
   5. Checkbox ist danach nicht angehakt.
   6. Schmales Fenster (Handy): Button über volle Breite, nur der Text scrollt.
   7. `agb.html` und `datenschutz.html` direkt aufrufen: Seiten im LaserFlow-Design.
+- Rechte an den echten Endpunkten (US03): `tests/test_role_access.py` geht alle Routen unter `/api/admin/` und `/api/account` durch: ohne Anmeldung 401, Kunde und Mitarbeiter bei Admin-Funktionen 403, „Mein Konto“ für jede Rolle erreichbar. Die Bausteine selbst testet `tests/test_dependencies.py`.
 - Anmeldefenster: automatische Tests in `frontend/tests/auth-gate.test.js`. Von Hand mit laufendem Backend auf `anmeldefenster-test.html`:
   1. Nicht angemeldet, Button klicken: Fenster öffnet, Hinweis „Nicht angemeldet“.
   2. ✕, Esc, Klick daneben: Fenster schließt jeweils.
