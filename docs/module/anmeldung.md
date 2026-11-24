@@ -31,6 +31,9 @@ Besucher legen ein Kundenkonto an (Registrieren), bestätigen ihre E-Mail-Adress
 | `frontend/datenschutz.html` | Datenschutzerklärung als eigene Seite; der Text steht nur hier (`#legal-text`) |
 | `frontend/css/rechtliches.css` | Aussehen der Seiten mit Rechtstexten |
 | `frontend/js/modules/agb-dialog.js` | Popup für AGB und Datenschutz auf `registrieren.html`, lädt den Text aus der verlinkten Seite |
+| `frontend/js/modules/auth-gate.js` | Anmeldefenster `requireLogin()` für Aktionen, die eine Anmeldung brauchen (US03) |
+| `frontend/css/auth-gate.css` | Aussehen des Anmeldefensters; bindet `auth-gate.js` selbst ein |
+| `frontend/anmeldefenster-test.html` | Testseite für das Anmeldefenster (nicht verlinkt) |
 | `frontend/tests/*.test.js` | Tests der Module |
 
 **Backend** (Router → Service → Models)
@@ -83,6 +86,20 @@ Die Formular-Styles (`.form`, `.field`, `.input`, `.alert` …) liegen in `front
 - `layout.js` fragt auf jeder Seite `GET /api/auth/me`. Antwortet das Backend mit Kundendaten, zeigt das Benutzermenü „Angemeldet als Vorname Nachname“.
 - „Abmelden“ ruft `POST /api/auth/logout` auf (Sitzung gelöscht, Cookie entfernt) und führt zur Startseite.
 
+**Anmeldefenster und Rücksprung** (US03, Issue #3)
+
+1. Eine Seite schützt eine Aktion (z. B. „Bild hochladen“, „In den Warenkorb“) mit `if (!(await requireLogin())) return;` aus `auth-gate.js`.
+2. `requireLogin()` fragt `GET /api/auth/me` (über `getCurrentUser()`). Angemeldet → `true`, die Aktion läuft weiter.
+3. Nicht angemeldet oder Server nicht erreichbar → es öffnet sich ein Fenster mit „Anmelden“ und „Jetzt registrieren“; Rückgabe `false`, die Aktion bricht ab.
+4. Beide Links tragen die aktuelle Seite als `?weiter=` (z. B. `anmelden.html?weiter=produkt.html%3Fid%3D2`). Fremde Adressen werden über `safeReturnTarget()` zur Startseite.
+5. Rücksprung:
+   - Anmelden → zurück zum Ziel (`anmelden.js`).
+   - Registrieren → Bestätigen → zurück zum Ziel (`registrieren.js`, `bestaetigen.js`).
+   - Wechsel zwischen Anmelden und Registrieren nimmt `?weiter=` in beide Richtungen mit (`anmelden.js` Link „Jetzt registrieren“, `registrieren.js` Link „Jetzt anmelden“).
+6. Schließen per ✕, Esc oder Klick auf den abgedunkelten Hintergrund.
+
+Einbinden auf einer neuen Seite: nur den Import und die eine Zeile oben. HTML oder CSS muss die Seite dafür nicht ergänzen.
+
 **AGB und Datenschutz (Popup)** (Issue #38)
 
 1. Die Links in der Checkbox zeigen auf `agb.html` bzw. `datenschutz.html` und haben das Merkmal `data-agb-open`.
@@ -131,6 +148,8 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - **Fehler verschwinden erst beim Tippen, nicht beim Verlassen des Feldes:** Sonst rutscht der Absende-Button beim Klick nach oben und der Klick geht ins Leere.
 
 - **AGB/Datenschutz als eigene Seiten plus Popup (Mischform):** Der Text steht nur einmal (in `agb.html` bzw. `datenschutz.html`) und ist auch direkt verlinkbar. Das Popup lädt ihn nach, damit das ausgefüllte Registrierungsformular erhalten bleibt.
+- **Anmeldefenster per JavaScript gebaut (`auth-gate.js`):** Seiten wie `produkt.html` brauchen dafür kein eigenes HTML und keine CSS-Zeile; `auth-gate.css` wird beim ersten Öffnen eingebunden.
+- **Server nicht erreichbar = nicht angemeldet:** Das Fenster erscheint lieber einmal zu oft, als eine Aktion ungeprüft laufen zu lassen. Die verbindliche Prüfung macht ohnehin das Backend bei jeder Anfrage.
 - **`fetch` direkt in `agb-dialog.js`, nicht über `api-client.js`:** Geladen wird eine eigene HTML-Seite, keine Backend-Schnittstelle (`/api/...`).
 - **`<dialog>` mit `showModal()`:** Abdunkeln, Esc und Fokus im Fenster liefert der Browser, dadurch wenig eigener Code.
 - **Checkbox wird nicht automatisch angehakt:** Die Zustimmung muss eine aktive Handlung des Kunden sein.
@@ -151,6 +170,12 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
   5. Checkbox ist danach nicht angehakt.
   6. Schmales Fenster (Handy): Button über volle Breite, nur der Text scrollt.
   7. `agb.html` und `datenschutz.html` direkt aufrufen: Seiten im LaserFlow-Design.
+- Anmeldefenster: automatische Tests in `frontend/tests/auth-gate.test.js`. Von Hand mit laufendem Backend auf `anmeldefenster-test.html`:
+  1. Nicht angemeldet, Button klicken: Fenster öffnet, Hinweis „Nicht angemeldet“.
+  2. ✕, Esc, Klick daneben: Fenster schließt jeweils.
+  3. „Anmelden“: Adresse enthält `?weiter=produkt.html%3Fid%3D1`; nach dem Anmelden landet man auf `produkt.html?id=1`.
+  4. „Jetzt registrieren“ und dort „Jetzt anmelden“: `?weiter=` bleibt in der Adresse.
+  5. Angemeldet, Button klicken: kein Fenster, Hinweis „Angemeldet“.
 
 ## Bekannte Grenzen
 
@@ -161,6 +186,7 @@ Fehlerantworten im FastAPI-Format `{ "detail": "..." }`, die Texte sind schon au
 - Abgelaufene Sitzungen werden erst gelöscht, wenn jemand sie benutzt.
 - Wer sich mit einer falschen E-Mail-Adresse registriert, kann sie nicht ändern, sondern muss sich neu registrieren; das falsche, unbestätigte Konto bleibt bestehen.
 - „Passwort vergessen“ ist in den Use Cases nicht vorgesehen und deshalb nicht umgesetzt.
+- Das Anmeldefenster ist gebaut, aber noch auf keiner echten Seite eingebunden. Mario bindet es in `produkt.js` ein (Katalog-PR), der Knopf „Bild hochladen“ folgt mit US04.
 - Die Links „Mein Konto“, „Meine Bestellungen“, „Persönliche Daten“ im Benutzermenü führen noch auf `#`.
 - Der Warenkorb-Zähler im Kopfbereich weiß noch nichts von der Anmeldung.
 - In AGB und Datenschutzerklärung sind einige Punkte noch „[noch offen]“ (siehe „Bewusste Entscheidungen“).
