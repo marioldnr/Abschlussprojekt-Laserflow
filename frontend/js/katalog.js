@@ -6,8 +6,16 @@
  * Ausverkaufte Produkte bekommen ein Schild "Ausverkauft" (Use Case
  * "Ausverkauft-Kennzeichnung anzeigen").
  */
-import { PRODUCTS, filterProducts, formatPrice, listCategories } from "./modules/products.js";
+import { PRODUCTS, filterProducts, formatPrice, listCategories, loadProducts } from "./modules/products.js";
 import { initCartDrawer } from "./modules/cart-drawer.js";
+
+// Produkte vom Backend laden. Gelingt das nicht, zeigt der Ergebnisbereich einen Hinweis (siehe unten).
+let loadError = null;
+try {
+  await loadProducts();
+} catch {
+  loadError = "Die Produkte konnten nicht geladen werden. Bitte später erneut versuchen.";
+}
 
 initCartDrawer();
 
@@ -91,4 +99,8 @@ function render() {
       : `${products.length} ${products.length === 1 ? "Produkt" : "Produkte"}`;
 }
 
-render();
+if (loadError) {
+  resultInfo.textContent = loadError;
+} else {
+  render();
+}

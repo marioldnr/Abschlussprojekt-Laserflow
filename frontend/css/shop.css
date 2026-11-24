@@ -30,6 +30,11 @@
   font-size: 0.95rem;
 }
 
+/* Ausverkaufte Produkte auf der Startseite: Foto abgedunkelt wie im Katalog (Schild = .product-badge) */
+.tile.is-sold-out .tile-image img {
+  filter: grayscale(0.7) brightness(0.7);
+}
+
 /* Kachel "Ganzer Katalog" auf der Startseite */
 .tile-more .tile-image {
   display: flex;
