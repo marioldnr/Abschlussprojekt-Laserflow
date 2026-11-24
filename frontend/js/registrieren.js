@@ -54,6 +54,14 @@ const REGISTER_SCHEMA = {
 
 const form = document.getElementById("register-form");
 
+// Der Link "Jetzt anmelden" nimmt das Weiterleitungsziel mit (wie in anmelden.js der Link
+// "Registrieren"), damit der Kunde nach dem Anmelden wieder auf dem gewählten Produkt landet.
+const loginLink = document.querySelector('.auth-switch a[href="anmelden.html"]');
+const loginReturnTarget = new URLSearchParams(window.location.search).get(RETURN_PARAM);
+if (loginLink && loginReturnTarget) {
+  loginLink.href = `anmelden.html?${new URLSearchParams({ [RETURN_PARAM]: loginReturnTarget })}`;
+}
+
 initPasswordToggles(form);
 initAgbDialog(); // AGB-Popup (Issue #38)
 enableLiveValidation(form, REGISTER_SCHEMA);
