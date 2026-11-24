@@ -11,7 +11,6 @@ meist einen ``FieldValidationError`` mit Meldung pro Formularfeld.
 import re
 import secrets
 from datetime import datetime
-from pathlib import Path
 
 from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
@@ -253,18 +252,6 @@ def _detect_image_type(content: bytes) -> str | None:
     return None
 
 
-def _delete_local_file(path: str | None) -> None:
-    """Löscht eine Kundenbild-Datei auf dem eigenen Datenträger, falls es sie gibt.
-
-    Kundenbilder liegen noch lokal (das Modul images nutzt den Bildspeicher noch nicht).
-    Deshalb löschen wir sie hier direkt. Würde man storage.delete_file nehmen, würden
-    lokale Pfade wie ``/home/.../uploads/bild.png`` still ignoriert, und das Kundenbild
-    bliebe nach dem Anonymisieren auf der Platte.
-    """
-    if path:
-        Path(path).unlink(missing_ok=True)
-
-
 def _delete_file(path: str | None) -> None:
     """Löscht eine Datei im Bildspeicher (app/storage.py), falls es sie gibt.
 
@@ -425,8 +412,9 @@ def _anonymize(db: Session, user: User) -> None:
     db.execute(delete(CartItem).where(CartItem.user_id == user.id))
     for image in db.scalars(select(CustomerImage).where(CustomerImage.user_id == user.id)).all():
         if image.id not in ordered_image_ids:
+            # Kundenbilder liegen im Bildspeicher (US04), wie das Profilbild
             for path in (image.original_path, image.background_removed_path, image.processed_path):
-                _delete_local_file(path)
+                _delete_file(path)
             db.delete(image)
 
     db.execute(delete(Address).where(Address.user_id == user.id))

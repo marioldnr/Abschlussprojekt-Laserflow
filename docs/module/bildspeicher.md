@@ -1,7 +1,7 @@
 # Modul: Bildspeicher (Neon Object Storage oder lokal)
 
-> Bereich: Grundlage für Dateien (Profilbilder, US10; später Produktbilder)
-> Stand: 14.11.2026. Profilbilder liegen im Bildspeicher. Produktbilder und Kundenbilder nutzen ihn noch nicht.
+> Bereich: Grundlage für Dateien (Profilbilder, US10; Kundenbilder, US04; später Produktbilder)
+> Stand: 24.11.2026. Profilbilder und Kundenbilder liegen im Bildspeicher. Produktbilder nutzen ihn noch nicht.
 > Hinweis: Eine gemeinsame Vorlage `docs/module/_vorlage.md` gibt es noch nicht. Diese Datei folgt dem Aufbau von `docs/module/datenbank.md`.
 
 ## Zweck
@@ -66,7 +66,7 @@ Für einen neuen Dateityp muss nur `_CONTENT_TYPES` in `app/storage.py` ergänzt
 - **Ungültige alte Pfade still ignoriert:** Lesen liefert `None`, Löschen tut nichts. Alte Werte wie `uploads/avatars/x.png` oder absolute Pfade sollen die App nicht zum Absturz bringen.
 - **Einstellungen für Neon im boto3-Client:** Neon versteht nur „path-style“-Adressen (`<endpunkt>/<bucket>/<key>`), deshalb `addressing_style: path`. Prüfsummen schickt boto3 nur, wo sie Pflicht sind, weil neuere boto3-Versionen sie sonst immer anhängen und S3-kompatible Speicher das oft ablehnen. Der Schlüssel gilt nur für den Neon-Branch, auf dem er erzeugt wurde (bei uns `production`).
 - **boto3 statt eigenem HTTP:** Der S3-Zugriff ist Standard und in boto3 gut getestet. Die Retries (bis 5 Versuche) fängt boto3 selbst ab.
-- **Kundenbilder bleiben vorerst lokal:** Beim Anonymisieren löscht `account_service` die Kundenbild-Dateien direkt auf dem Datenträger (`_delete_local_file`). Würde man sie über `delete_file` löschen, blieben sie auf der Platte liegen, weil ihre Pfade keine gültigen Schlüssel sind.
+- **Kundenbilder im Bildspeicher (seit 24.11.2026, US04):** Der Upload speichert sie unter `customer-images/<user_id>-<zufall>.<jpg|png>` (siehe `bild-upload.md`). Beim Anonymisieren (US10) löscht `account_service._anonymize` sie ebenfalls über `delete_file`, lokal und im Bucket. Die frühere Sonderfunktion `_delete_local_file` gibt es nicht mehr.
 
 ## Testen
 
@@ -78,6 +78,6 @@ Für einen neuen Dateityp muss nur `_CONTENT_TYPES` in `app/storage.py` ergänzt
 
 - **Alte Profilbilder werden nicht übertragen:** Bilder, die vor dieser Umstellung lokal in `uploads/avatars/` lagen, sind im Object Storage nicht vorhanden. Der Kunde lädt sein Profilbild einfach neu hoch. Der alte lokale Eintrag liefert bis dahin kein Bild (404) und wird beim Ersetzen nicht mehr von der Platte gelöscht.
 - **Bild läuft über unseren Server:** Die App liefert das Bild selbst aus (`GET /api/account/avatar`). Der Browser lädt es nicht direkt aus Neon.
-- **Produktbilder nutzen den Baustein noch nicht.** Kundenbilder werden weiter lokal gespeichert (siehe oben).
+- **Produktbilder nutzen den Baustein noch nicht.**
 - **Neon Object Storage ist neu.** Laut Neon-Doku (Stand 11.2026) gilt im Free Plan ein Limit von 5 GB pro Projekt. Bei hoher Last antwortet der Speicher mit `503 SlowDown`. boto3 wiederholt die Anfrage, bei anhaltender Überlast schlägt der Upload trotzdem fehl.
 - **Lokale Dateien und Bucket sind getrennt:** Wer ohne Bucket arbeitet, sieht die Profilbilder der anderen nicht.

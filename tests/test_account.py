@@ -6,10 +6,12 @@ E-Mails werden abgefangen und in ``sent_mails`` gesammelt.
 
 import re
 
+import boto3
 import pytest
+from botocore.stub import Stubber
 from sqlalchemy import select
 
-from app import config
+from app import config, storage
 from app.accounts import account_service, service
 from app.accounts.models import Address, User, UserSession
 from app.accounts.schemas import RegisterRequest
@@ -398,8 +400,9 @@ def test_active_account_is_never_anonymized(db, user):
 
 def test_customer_images_in_orders_are_kept(db, user, upload_dir):
     make_order(db, user, status="shipped", with_image=True)
-    loose = CustomerImage(user_id=user.id, product_id=1, original_path=str(upload_dir / "lose.png"))
-    (upload_dir / "lose.png").write_bytes(PNG)
+    key = "customer-images/1-lose.png"  # Schlüssel im Bildspeicher, wie beim Upload (US04)
+    storage.save_file(key, PNG)
+    loose = CustomerImage(user_id=user.id, product_id=1, original_path=key)
     db.add(loose)
     db.add(CartItem(user_id=user.id, product_id=1))
     db.commit()
@@ -408,8 +411,28 @@ def test_customer_images_in_orders_are_kept(db, user, upload_dir):
 
     remaining = db.query(CustomerImage).filter_by(user_id=user.id).all()
     assert len(remaining) == 1  # nur das Bild aus der Bestellung
-    assert not (upload_dir / "lose.png").exists()
+    assert storage.read_file(key) is None
+    assert not (upload_dir / key).exists()
     assert db.query(CartItem).filter_by(user_id=user.id).count() == 0
+
+
+def test_customer_images_are_deleted_in_object_storage(db, user, monkeypatch):
+    """Mit Bucket (Fake, kein Netz): Beim Anonymisieren geht ein Löschauftrag für das Kundenbild raus."""
+    key = "customer-images/1-lose.png"
+    db.add(CustomerImage(user_id=user.id, product_id=1, original_path=key))
+    db.commit()
+    client = boto3.client("s3", region_name="eu-central-1", endpoint_url="https://example.invalid",
+                          aws_access_key_id="x", aws_secret_access_key="y")
+    monkeypatch.setattr(config, "STORAGE_BUCKET", "testbucket")
+    storage.set_client(client)
+    try:
+        with Stubber(client) as stubber:
+            stubber.add_response("delete_object", {}, {"Bucket": "testbucket", "Key": key})
+            account_service.delete_account(db, user, PASSWORD)
+            stubber.assert_no_pending_responses()
+    finally:
+        storage.set_client(None)
+    assert db.query(CustomerImage).filter_by(user_id=user.id).count() == 0
 
 
 def test_delete_account_needs_correct_password(db, user):
