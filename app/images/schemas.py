@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class ImageResponse(BaseModel):
@@ -18,9 +18,26 @@ class ImageResponse(BaseModel):
     product_id: int
     status: str
     created_at: datetime
+    # Intern als Text mit "; " getrennt gespeichert, nach außen als Liste (quality_warnings)
+    quality_warning: str | None = Field(default=None, exclude=True)
+
+    @computed_field
+    @property
+    def quality_warnings(self) -> list[str]:
+        """Hinweise zu Kontrast und Schärfe. Leer, wenn alles passt."""
+        return self.quality_warning.split("; ") if self.quality_warning else []
 
     @computed_field
     @property
     def original_url(self) -> str:
         """Adresse, unter der der Kunde sein Originalbild abrufen kann."""
         return f"/api/images/{self.id}/original"
+
+
+class UploadResponse(ImageResponse):
+    """Antwort direkt nach dem Upload: wie ImageResponse, dazu das Ergebnis der Auflösungsprüfung.
+
+    ``needs_upscale`` gibt es nur hier, weil es nicht gespeichert wird (siehe service.UploadResult).
+    """
+
+    needs_upscale: bool

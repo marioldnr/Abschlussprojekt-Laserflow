@@ -1,21 +1,22 @@
 """Logik des Moduls images: Kundenbilder hochladen und abrufen (US04).
 
 Ablauf beim Hochladen (siehe upload_image):
-    1. Produkt prüfen (muss existieren und sichtbar sein)
+    1. Produkt prüfen (muss existieren, sichtbar sein und einen Gravurbereich haben)
     2. Datei prüfen (nicht leer, höchstens 5 MB, JPEG oder PNG)
-    3. Datei über app/storage.py speichern (Neon Object Storage oder lokal)
-    4. Eintrag in customer_images mit Status "uploaded" anlegen
-
-Die Bildqualität (Auflösung, Kontrast, Schärfe) prüft dieses Modul noch nicht (US04 Task 3).
+    3. Bildqualität prüfen (app/images/quality.py): Auflösung hart, Kontrast und Schärfe als Warnung
+    4. Datei über app/storage.py speichern (Neon Object Storage oder lokal)
+    5. Eintrag in customer_images mit Status "uploaded" und ggf. Warnungen anlegen
 """
 
 import secrets
+from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
 from app import storage
 from app.accounts.models import User
 from app.catalog.models import Product
+from app.images import quality
 from app.images.models import CustomerImage
 
 # Höchstgröße laut Akzeptanzkriterium von US04. Genau 5 MB sind noch erlaubt.
@@ -26,6 +27,10 @@ MSG_SIZE = f"Das Bild darf höchstens {MAX_BYTES // (1024 * 1024)} MB groß sein
 MSG_TYPE = "Bitte wähle ein Bild im Format JPEG oder PNG."
 MSG_PRODUCT_NOT_FOUND = "Dieses Produkt gibt es nicht."
 MSG_IMAGE_NOT_FOUND = "Dieses Bild gibt es nicht."
+MSG_NO_UPLOAD = quality.MSG_NO_ENGRAVING_AREA
+
+# Trennzeichen, wenn mehrere Warnungen in der Spalte quality_warning stehen
+WARNING_SEPARATOR = "; "
 
 STATUS_UPLOADED = "uploaded"
 
@@ -70,6 +75,15 @@ class ProductNotFoundError(ImageError):
 
     def __init__(self):
         super().__init__(MSG_PRODUCT_NOT_FOUND)
+
+
+class ProductNotUploadableError(ImageError):
+    """Das Produkt hat keinen Gravurbereich, ein Kundenbild ist dafür nicht möglich (404)."""
+
+    status_code = 404
+
+    def __init__(self):
+        super().__init__(MSG_NO_UPLOAD)
 
 
 class ImageNotFoundError(ImageError):
@@ -125,12 +139,26 @@ def validate_file(content: bytes) -> str:
 # --------------------------------------------------------------------------- Hochladen und abrufen
 
 
-def upload_image(db: Session, user: User, product_id: int, content: bytes) -> CustomerImage:
-    """Speichert ein Kundenbild für ein Produkt (US04 Task 1).
+@dataclass
+class UploadResult:
+    """Ergebnis eines Uploads: der neue Datenbank-Eintrag und die Messwerte der Prüfung.
+
+    ``quality.needs_upscale`` wird nicht gespeichert (keine eigene Spalte). US06 rechnet
+    den Faktor beim Aufbereiten aus Bild und Produkt selbst neu aus.
+    """
+
+    image: CustomerImage
+    quality: quality.QualityResult
+
+
+def upload_image(db: Session, user: User, product_id: int, content: bytes) -> UploadResult:
+    """Prüft und speichert ein Kundenbild für ein Produkt (US04 Task 1 bis 3).
 
     Die Datei kommt unverändert in den Bildspeicher, in der Datenbank steht nur der
     Schlüssel (z. B. ``customer-images/3-a1b2c3d4e5f60718.png``). Der Zufallsteil
     verhindert, dass zwei Uploads denselben Namen bekommen.
+    Gespeichert wird erst, wenn alle harten Prüfungen bestanden sind. Warnungen
+    (Kontrast, Schärfe) stehen danach in ``quality_warning``, getrennt mit "; ".
 
     Args:
         db: Datenbank-Session.
@@ -139,25 +167,42 @@ def upload_image(db: Session, user: User, product_id: int, content: bytes) -> Cu
         content: Inhalt der Datei.
 
     Returns:
-        Der neue Eintrag in customer_images (Status "uploaded").
+        UploadResult mit dem neuen Eintrag (Status "uploaded") und den Messwerten.
 
     Raises:
         ProductNotFoundError: Produkt fehlt oder ist ausgeblendet.
-        ImageValidationError: Datei ungültig (siehe validate_file).
+        ProductNotUploadableError: Produkt hat keinen Gravurbereich.
+        ImageValidationError: Datei ungültig (siehe validate_file), nicht lesbar oder
+            so klein, dass auch Hochskalieren nicht reicht (Meldung nennt die Mindestgröße).
     """
     product = db.get(Product, product_id)
     if product is None or product.is_hidden:
         raise ProductNotFoundError()
+    try:
+        quality.target_size(product.engraving_width_mm, product.engraving_height_mm)
+    except quality.NoEngravingAreaError as error:
+        raise ProductNotUploadableError() from error
+
     extension = validate_file(content)
+    try:
+        result = quality.check_quality(content, product.engraving_width_mm, product.engraving_height_mm)
+    except (quality.ResolutionTooLowError, quality.UnreadableImageError) as error:
+        raise ImageValidationError(error.message) from error
 
     key = f"customer-images/{user.id}-{secrets.token_hex(8)}.{extension}"
     storage.save_file(key, content)
 
-    image = CustomerImage(user_id=user.id, product_id=product.id, original_path=key, status=STATUS_UPLOADED)
+    image = CustomerImage(
+        user_id=user.id,
+        product_id=product.id,
+        original_path=key,
+        status=STATUS_UPLOADED,
+        quality_warning=WARNING_SEPARATOR.join(result.warnings) or None,
+    )
     db.add(image)
     db.commit()
     db.refresh(image)
-    return image
+    return UploadResult(image=image, quality=result)
 
 
 def get_own_image(db: Session, user: User, image_id: int) -> CustomerImage:

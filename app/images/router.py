@@ -15,7 +15,7 @@ from app.accounts.dependencies import get_current_user
 from app.accounts.models import User
 from app.database import get_db
 from app.images import service
-from app.images.schemas import ImageResponse
+from app.images.schemas import ImageResponse, UploadResponse
 
 router = APIRouter(prefix="/api/images", tags=["Kundenbilder"])
 
@@ -25,7 +25,7 @@ def _http_error(error: service.ImageError) -> HTTPException:
     return HTTPException(status_code=error.status_code, detail=error.detail)
 
 
-@router.post("", response_model=ImageResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UploadResponse, status_code=status.HTTP_201_CREATED)
 async def upload_image(
     request: Request,
     product_id: int = Query(..., description="Produkt, auf das graviert wird"),
@@ -43,10 +43,14 @@ async def upload_image(
         raise _http_error(service.ImageValidationError(service.MSG_SIZE))
     content = await request.body()
     try:
-        image = service.upload_image(db, user, product_id, content)
+        result = service.upload_image(db, user, product_id, content)
     except service.ImageError as error:
         raise _http_error(error) from error
-    return image
+    return UploadResponse.model_validate(
+        {**ImageResponse.model_validate(result.image).model_dump(),
+         "quality_warning": result.image.quality_warning,
+         "needs_upscale": result.quality.needs_upscale}
+    )
 
 
 @router.get("/{image_id}", response_model=ImageResponse)
