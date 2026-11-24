@@ -1,98 +1,111 @@
 /**
  * LaserFlow – products.js (Produktdaten für Katalog und Produktseite)
  *
- * Vorläufige, fest eingetragene Produktliste, damit Katalog und Produktseite schon
- * präsentierbar sind. Die Felder heißen wie in der Tabelle "products"
- * (app/catalog/models.py): Preise in Cent, Maße in Millimetern.
+ * Die Produkte kommen aus der Datenbank: loadProducts() holt sie einmal über
+ * GET /api/products (Modul app/catalog) und legt sie in PRODUCTS ab. Die Seiten lesen
+ * danach PRODUCTS wie vorher. PRODUCTS ist bewusst immer dasselbe Array-Objekt
+ * (es wird gefüllt, nie neu zugewiesen), damit cart-drawer.js über findProduct weiter
+ * funktioniert, ohne geändert zu werden.
  *
- * Später: Sobald es einen Katalog-Endpunkt gibt (z. B. GET /api/products), lädt
- * eine Funktion in api-client.js die Liste vom Backend. Die Seiten rufen dann diese
- * Funktion auf statt PRODUCTS zu lesen; formatPrice, findProduct und filterProducts bleiben.
+ * Die API liefert Felder wie in der Tabelle "products" (Preise in Cent, Maße in mm).
+ * Hier kommen nur die Felder dazu, die die Oberfläche braucht: category, material,
+ * has_customer_image.
  *
- * Preise und Maße sind Schätzwerte (Platzhalter) und werden später im Team festgelegt.
+ * Material ist für alle Produkte gleich (US14) und steht deshalb als Konstante hier.
  */
+
+import { requestJson } from "./api-client.js";
+
+/** Material aller Produkte (laut US14 gleich für alle). */
+export const MATERIAL = "Sperrholz, 3 mm";
+
+/** Produktart, bei der der Kunde ein eigenes Bild hochlädt (US04). */
+const PRODUCT_TYPE_CUSTOMER_IMAGE = "customer_image";
 
 /**
  * @typedef {Object} Product
  * @property {number} id
- * @property {string} slug            Kurzname, auch für Bilddateien
  * @property {string} name
- * @property {string} category        Kategorie für den Filter im Katalog
- * @property {string} short_description  ein Satz für Kachel und Kopf der Produktseite
- * @property {string} description     ausführlicher Text für die Produktseite
+ * @property {string|null} product_type   "customer_image" oder "finished" (aus der API)
+ * @property {string} category            Anzeige für den Filter: "Mit eigenem Bild" oder "Fertige Produkte"
+ * @property {boolean} has_customer_image true, wenn der Kunde ein eigenes Bild hochlädt
+ * @property {string} short_description   ein Satz für Kachel und Kopf der Produktseite
+ * @property {string|null} description    ausführlicher Text für die Produktseite
  * @property {number} width_mm
  * @property {number} height_mm
- * @property {number} depth_mm
+ * @property {number|null} depth_mm       fehlt bei flachen Produkten
  * @property {number} price_cent
  * @property {string} material
  * @property {boolean} is_sold_out
- * @property {string[]} images        Bildpfade, das erste ist das Titelbild
+ * @property {string[]} images            Bildpfade, das erste ist das Titelbild
  */
 
-/** @type {Product[]} */
-export const PRODUCTS = [
-  {
-    id: 1,
-    slug: "x-wing",
-    name: "X-Wing Starfighter",
-    category: "Modellbau",
-    short_description: "Detailreiches Raumschiff-Modell mit Standfuß und graviertem Namensschild.",
-    description:
-      "Über 20 lasergeschnittene Einzelteile, fein graviert und präzise ineinander gesteckt. " +
-      "Das Modell schwebt auf einem schmalen Stab über dem Standfuß, die Tragflächen stehen in " +
-      "der typischen X-Stellung. Vorne sitzt ein graviertes Namensschild. Ein Hingucker für " +
-      "Regal, Schreibtisch oder Vitrine.",
-    width_mm: 115,
-    height_mm: 95,
-    depth_mm: 110,
-    price_cent: 2490,
-    material: "Sperrholz, 3 mm, unbehandelt",
-    is_sold_out: false,
-    images: [
-      "img/produkte/x-wing-1.webp",
-      "img/produkte/x-wing-2.webp",
-      "img/produkte/x-wing-3.webp",
-      "img/produkte/x-wing-4.webp",
-    ],
-  },
-  {
-    id: 2,
-    slug: "telefonzelle",
-    name: "Britische Telefonzelle",
-    category: "Deko",
-    short_description: "Klassische Telefonzelle mit Sprossenfenstern und Gravur „TELEPHONE“.",
-    description:
-      "Die berühmte Telefonzelle als Holzmodell: vier Seiten mit ausgeschnittenen Sprossenfenstern, " +
-      "dahinter milchige Scheiben, oben die Krone und der Schriftzug „TELEPHONE“. " +
-      "Die Wände sind mit Fingerzinken verbunden. Oben offen, dadurch auch als Stifthalter " +
-      "oder mit einem LED-Teelicht als kleine Laterne nutzbar.",
-    width_mm: 40,
-    height_mm: 100,
-    depth_mm: 40,
-    price_cent: 1490,
-    material: "Sperrholz, 3 mm, mit Kunststoffscheiben",
-    is_sold_out: false,
-    images: ["img/produkte/telefonzelle-1.webp", "img/produkte/telefonzelle-2.webp"],
-  },
-  {
-    id: 3,
-    slug: "mini-wc",
-    name: "Mini-WC",
-    category: "Miniaturen",
-    short_description: "Kleine Toilette aus geschichteten Holzlagen – mit Augenzwinkern.",
-    description:
-      "Aus vielen dünnen Holzschichten aufgebaut, dadurch entsteht die typische Streifenoptik. " +
-      "Mit Spülknopf auf dem Spülkasten und Gravur im Becken. " +
-      "Ein witziges Geschenk, ein Deko-Objekt für das Puppenhaus oder ein Halter für Büroklammern.",
-    width_mm: 30,
-    height_mm: 38,
-    depth_mm: 45,
-    price_cent: 690,
-    material: "Sperrholz, 3 mm, verleimt",
-    is_sold_out: false,
-    images: ["img/produkte/mini-wc-1.webp", "img/produkte/mini-wc-2.webp", "img/produkte/mini-wc-3.webp"],
-  },
-];
+/**
+ * Zwischenspeicher aller Produkte für die Seiten. Wird von loadProducts() bzw. setProducts() gefüllt.
+ * @type {Product[]}
+ */
+export const PRODUCTS = [];
+
+/** Merkt sich den Ladevorgang, damit Seiten nicht mehrfach laden. */
+let loadingPromise = null;
+
+/** Bild, wenn ein Produkt (noch) kein Foto hat. */
+export const FALLBACK_IMAGE = "img/logo/logo-auf-dunkel.svg";
+
+/**
+ * Wandelt ein Produkt aus der API in die Form um, die die Seiten brauchen.
+ * Warum eine eigene Funktion: Die Anzeige-Kategorie leitet sich aus der Produktart ab,
+ * weil es keine Kategorie-Spalte in der Datenbank gibt.
+ * @param {object} apiProduct Produkt aus GET /api/products
+ * @returns {Product}
+ */
+export function toViewProduct(apiProduct) {
+  const hasCustomerImage = apiProduct.product_type === PRODUCT_TYPE_CUSTOMER_IMAGE;
+  const description = apiProduct.description ?? "";
+  const shortText = apiProduct.short_description ?? "";
+  return {
+    ...apiProduct,
+    // Ohne Foto ein neutrales Bild, damit Kachel und Galerie nicht "kaputt" aussehen
+    images: apiProduct.images?.length ? apiProduct.images : [FALLBACK_IMAGE],
+    // Beschreibung ohne den ersten Satz, der schon als Kurzbeschreibung oben steht
+    long_description: description.startsWith(shortText) ? description.slice(shortText.length).trim() || description : description,
+    category: hasCustomerImage ? "Mit eigenem Bild" : "Fertige Produkte",
+    material: MATERIAL,
+    has_customer_image: hasCustomerImage,
+  };
+}
+
+/**
+ * Ersetzt den Inhalt von PRODUCTS durch die übergebenen Produkte (aus der API).
+ * Für Tests und für loadProducts().
+ * @param {object[]} list Produkte wie von der API geliefert
+ * @returns {Product[]} PRODUCTS (dasselbe Array)
+ */
+export function setProducts(list) {
+  PRODUCTS.splice(0, PRODUCTS.length, ...list.map(toViewProduct));
+  return PRODUCTS;
+}
+
+/**
+ * Lädt die Produkte einmal vom Backend und füllt PRODUCTS.
+ * Ein zweiter Aufruf wartet auf denselben Ladevorgang und lädt nicht erneut.
+ * Schlägt das Laden fehl, wird der Merker gelöscht, damit ein späterer Aufruf es erneut versucht.
+ *
+ * @returns {Promise<Product[]>} PRODUCTS
+ * @throws {import("./api-client.js").ApiError} wenn der Server nicht erreichbar ist oder einen Fehler meldet
+ */
+export async function loadProducts() {
+  if (!loadingPromise) {
+    loadingPromise = requestJson("/products")
+      .then((list) => setProducts(list))
+      .catch((error) => {
+        loadingPromise = null;
+        throw error;
+      });
+  }
+  await loadingPromise;
+  return PRODUCTS;
+}
 
 const priceFormat = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" });
 
@@ -107,11 +120,15 @@ export function formatPrice(cents) {
 
 /**
  * Formatiert die Maße als Text, z. B. "11,5 × 9,5 × 11 cm (B × H × T)".
+ * Fehlt die Tiefe (depth_mm ist null), entfällt sie: "4 × 10 cm (B × H)".
  * @param {Product} product
  * @returns {string}
  */
 export function formatDimensions(product) {
   const cm = (mm) => (mm / 10).toLocaleString("de-DE");
+  if (product.depth_mm == null) {
+    return `${cm(product.width_mm)} × ${cm(product.height_mm)} cm (B × H)`;
+  }
   return `${cm(product.width_mm)} × ${cm(product.height_mm)} × ${cm(product.depth_mm)} cm (B × H × T)`;
 }
 
@@ -128,7 +145,7 @@ export function findProduct(id, products = PRODUCTS) {
 }
 
 /**
- * Liefert alle Kategorien in der Reihenfolge ihres ersten Auftretens.
+ * Liefert alle Kategorien (Produktarten) in der Reihenfolge ihres ersten Auftretens.
  * @param {Product[]} [products]
  * @returns {string[]}
  */
@@ -140,8 +157,8 @@ export function listCategories(products = PRODUCTS) {
  * Filtert und sortiert die Produktliste für den Katalog.
  * @param {Product[]} products
  * @param {{ query?: string, category?: string, sort?: "empfohlen"|"preis-auf"|"preis-ab"|"name" }} options
- *   query: Suchtext (Name, Kategorie, Kurzbeschreibung; Groß-/Kleinschreibung egal)
- *   category: Kategorie oder "" für alle
+ *   query: Suchtext (Name, Produktart, Kurzbeschreibung; Groß-/Kleinschreibung egal)
+ *   category: Produktart (Anzeige-Text) oder "" für alle
  * @returns {Product[]} neue Liste, die Eingabe bleibt unverändert
  */
 export function filterProducts(products, { query = "", category = "", sort = "empfohlen" } = {}) {

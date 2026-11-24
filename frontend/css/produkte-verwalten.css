@@ -1,0 +1,272 @@
+/*
+ * LaserFlow – produkte-verwalten.css (nur für produkte-verwalten.html, US14 "Produkte verwalten", Anfang)
+ *
+ * Aufbau an mitarbeiter.css angelehnt: Kennzahlen, Suche und Filter, Glas-Karte mit einer Zeile pro Produkt.
+ * Farben, Schriften und Abstände nur aus den Variablen in design.css (docs/design.md, Abschnitt 4).
+ */
+
+.manage {
+  position: relative;
+  padding: 72px 0 96px;
+  overflow: hidden;
+}
+
+/* weicher Lichtschein hinter der Karte, damit der Glas-Effekt sichtbar wird */
+.manage::before {
+  content: "";
+  position: absolute;
+  top: 6%;
+  left: calc(50% - 360px);
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow), transparent 65%);
+  filter: blur(30px);
+  pointer-events: none;
+  animation: float 14s ease-in-out infinite;
+}
+
+.manage-layout {
+  position: relative;
+  display: grid;
+  justify-content: center;
+}
+
+.manage-access {
+  justify-self: center;
+  width: min(100%, 820px);
+}
+
+.manage-panel {
+  position: relative;
+  width: min(100%, 820px);
+  justify-self: center;
+  padding: 40px 36px 32px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: calc(var(--radius) * 1.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 30px 60px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.manage-head {
+  margin-bottom: 24px;
+}
+
+.manage-head .eyebrow {
+  margin: 0 0 4px;
+}
+
+.manage-head h1 {
+  margin: 0 0 6px;
+  font-size: 2.3rem;
+}
+
+.manage-intro {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Kennzahlen: drei kleine Kacheln nebeneinander */
+.manage-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.manage-stat {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.manage-stat dt {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.manage-stat dd {
+  margin: 2px 0 0;
+  font-size: 1.6rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums; /* Ziffern gleich breit */
+  line-height: 1.2;
+  color: var(--text);
+}
+
+/* Suche und Filter */
+.manage-tools {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.manage-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Filter als kleine Glas-Pillen; aktiv = Akzentrand */
+.manage-filter {
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s, background 0.25s, transform 0.3s var(--ease);
+}
+
+.manage-filter:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  transform: scale(1.03);
+}
+
+.manage-filter[aria-pressed="true"] {
+  color: var(--glass-text);
+  background: var(--glass-soft);
+  border-color: var(--glass-border);
+}
+
+.manage-filter:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.manage-empty {
+  margin: 0;
+  padding: 18px 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Liste: eine Zeile pro Produkt */
+.manage-items {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Zeile: Bild 64 px | Text | Knöpfe */
+.manage-item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.3s, transform 0.35s var(--ease), background 0.3s, opacity 0.3s;
+}
+
+.manage-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: rgba(255, 255, 255, 0.035);
+  transform: translateY(-2px);
+}
+
+/* ausgeblendet: ausgegraut, damit man es in der Liste sofort erkennt */
+.manage-item.is-hidden {
+  opacity: 0.55;
+}
+
+.manage-item.is-hidden:hover {
+  opacity: 0.8;
+}
+
+.manage-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.manage-name {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.manage-meta {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Status-Plaketten: nur Rahmen, nicht voll gefüllt */
+.manage-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+.manage-badge {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--danger);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, var(--border));
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.manage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.manage-button {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .manage {
+    padding: 40px 0 64px;
+  }
+
+  .manage-panel {
+    padding: 32px 22px 26px;
+  }
+
+  .manage-head h1 {
+    font-size: 1.9rem;
+  }
+
+  /* Knöpfe rutschen unter den Text */
+  .manage-item {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .manage-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .manage-stat dd {
+    font-size: 1.35rem;
+  }
+}

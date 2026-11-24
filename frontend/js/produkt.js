@@ -4,11 +4,21 @@
  * Liest die Produkt-ID aus der Adresse (produkt.html?id=2) und zeigt:
  * Bildergalerie (Pfeile, Punkte, Vorschaubilder, Wischen auf dem Handy),
  * Name, Preis, Beschreibung, Maße/Material und "In den Warenkorb".
- * Unbekannte ID → Hinweis mit Link zum Katalog.
+ * Unbekannte ID → Hinweis mit Link zum Katalog. Fehler beim Laden der Produkte → eigener Hinweis.
+ * Produkte mit eigenem Bild (has_customer_image) zeigen "Bild hochladen" statt "In den Warenkorb";
+ * der Upload folgt mit US04.
  */
-import { PRODUCTS, findProduct, formatDimensions, formatPrice } from "./modules/products.js";
+import { PRODUCTS, findProduct, formatDimensions, formatPrice, loadProducts } from "./modules/products.js";
 import { initCartDrawer, addToCart } from "./modules/cart-drawer.js";
 import { MAX_QUANTITY } from "./modules/cart.js";
+
+// Produkte vom Backend laden, bevor die Adresse ausgewertet wird.
+let loadError = false;
+try {
+  await loadProducts();
+} catch {
+  loadError = true;
+}
 
 initCartDrawer();
 
@@ -18,7 +28,13 @@ const product = findProduct(params.get("id"));
 const view = document.getElementById("product-view");
 const notFound = document.getElementById("product-not-found");
 
-if (!product) {
+if (loadError) {
+  view.hidden = true;
+  notFound.hidden = false;
+  notFound.querySelector("h2").textContent = "Das Produkt lässt sich gerade nicht anzeigen.";
+  notFound.querySelector("p:not(.eyebrow)").textContent =
+    "Die Produkte konnten nicht geladen werden. Bitte später erneut versuchen.";
+} else if (!product) {
   view.hidden = true;
   notFound.hidden = false;
 } else {
@@ -34,7 +50,7 @@ function showProduct(product) {
   document.getElementById("product-name").textContent = product.name;
   document.getElementById("product-short").textContent = product.short_description;
   document.getElementById("product-price").textContent = formatPrice(product.price_cent);
-  document.getElementById("product-description").textContent = product.description;
+  document.getElementById("product-description").textContent = product.long_description;
   document.getElementById("product-dimensions").textContent = formatDimensions(product);
   document.getElementById("product-material").textContent = product.material;
 
@@ -122,6 +138,13 @@ function setupBuyBox(product) {
   const soldOut = document.getElementById("sold-out-note");
   let quantity = 1;
 
+  // Hinweis unter dem Kaufbereich, nur für den Upload-Platzhalter (kein alert)
+  const uploadNote = document.createElement("p");
+  uploadNote.className = "product-price-note";
+  uploadNote.setAttribute("role", "status");
+  uploadNote.hidden = true;
+  addButton.parentElement.insertAdjacentElement("afterend", uploadNote);
+
   function update() {
     value.textContent = String(quantity);
     minus.disabled = quantity <= 1;
@@ -135,9 +158,17 @@ function setupBuyBox(product) {
     addButton.disabled = true;
     addButton.textContent = "Ausverkauft";
     soldOut.hidden = false;
+  } else if (product.has_customer_image) {
+    addButton.textContent = "Bild hochladen";
   }
 
   addButton.addEventListener("click", () => {
+    // Produkte mit eigenem Bild kommen erst mit US04 in den Warenkorb; bis dahin nur ein Hinweis.
+    if (product.has_customer_image && !product.is_sold_out) {
+      uploadNote.textContent = "Der Bild-Upload folgt in Kürze (US04).";
+      uploadNote.hidden = false;
+      return;
+    }
     addToCart(product.id, quantity);
     quantity = 1;
     update();

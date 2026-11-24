@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produkte verwalten – LaserFlow</title>
+  <meta name="description" content="Produkte von LaserFlow als ausverkauft markieren oder ausblenden (nur für Mitarbeiter und Admins).">
+  <meta name="robots" content="noindex">
+
+  <!-- Gemeinsam für jede Seite: Schriften, Design, Layout, Bausteine, Verhalten (siehe docs/design.md) -->
+  <link rel="icon" href="img/logo/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="img/logo/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="img/logo/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <script src="js/layout.js" defer></script>
+
+  <!-- Nur für diese Seite -->
+  <link rel="stylesheet" href="css/produkte-verwalten.css">
+  <script type="module" src="js/produkte-verwalten.js"></script>
+</head>
+
+<body>
+
+  <!-- Kopfbereich: wird beim Scrollen kompakter (Klasse "is-scrolled" setzt layout.js) -->
+  <header class="header" id="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-kopf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-kopf)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+
+      <nav class="nav" aria-label="Hauptnavigation">
+        <a href="index.html#ueber-uns">Über uns</a>
+        <a href="index.html#produkte">Produkte</a>
+        <a href="index.html#so-gehts">So funktioniert's</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Benutzer-Icon mit Menü: Inhalt hängt davon ab, ob man angemeldet ist (siehe layout.js) -->
+        <div class="user-menu">
+          <button class="icon-button" id="user-button" aria-haspopup="true" aria-expanded="false" aria-label="Benutzerkonto">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+            </svg>
+          </button>
+          <div class="dropdown" id="user-dropdown" role="menu">
+            <!-- wird von layout.js befüllt -->
+          </div>
+        </div>
+
+        <!-- Warenkorb-Icon mit Anzahl -->
+        <a href="#" class="icon-button cart" aria-label="Warenkorb">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 7h14l-1.5 11a2 2 0 0 1-2 1.7h-7a2 2 0 0 1-2-1.7z"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2"/>
+          </svg>
+          <span class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Produkte verwalten (US14, Anfang): Mitarbeiter sehen alle Produkte, auch ausgeblendete,
+         und markieren sie als ausverkauft oder blenden sie aus. Anlegen, Bearbeiten und Bilder folgen noch. -->
+    <section class="manage" aria-labelledby="manage-title">
+      <div class="container manage-layout">
+
+        <!-- Hinweis, falls niemand oder kein Mitarbeiter angemeldet ist (füllt produkte-verwalten.js) -->
+        <p class="alert alert-error manage-access" id="manage-access" role="alert" hidden></p>
+
+        <div class="manage-panel reveal" id="manage-panel" hidden>
+          <div class="manage-head">
+            <p class="eyebrow">Sortiment</p>
+            <h1 id="manage-title">Produkte verwalten</h1>
+            <p class="manage-intro">Markiere Produkte als ausverkauft oder blende sie im Katalog aus.</p>
+          </div>
+
+          <!-- Kennzahlen (füllt produkte-verwalten.js) -->
+          <dl class="manage-stats">
+            <div class="manage-stat"><dt>Gesamt</dt><dd id="stat-total">0</dd></div>
+            <div class="manage-stat"><dt>Ausverkauft</dt><dd id="stat-sold-out">0</dd></div>
+            <div class="manage-stat"><dt>Ausgeblendet</dt><dd id="stat-hidden">0</dd></div>
+          </dl>
+
+          <!-- Suchen und Filtern -->
+          <div class="manage-tools">
+            <input class="input manage-search" id="manage-search" type="search" placeholder="Produktname suchen …" autocomplete="off" aria-label="Produkte suchen">
+            <div class="manage-filters" role="group" aria-label="Produkte filtern">
+              <button class="manage-filter" type="button" data-filter="all" aria-pressed="true">Alle</button>
+              <button class="manage-filter" type="button" data-filter="available" aria-pressed="false">Verfügbar</button>
+              <button class="manage-filter" type="button" data-filter="sold-out" aria-pressed="false">Ausverkauft</button>
+              <button class="manage-filter" type="button" data-filter="hidden" aria-pressed="false">Ausgeblendet</button>
+            </div>
+          </div>
+
+          <!-- Rückmeldung nach einer Aktion oder Fehler (füllt produkte-verwalten.js) -->
+          <p class="alert" id="manage-message" role="status" hidden></p>
+
+          <p class="manage-empty" id="manage-empty" hidden></p>
+          <ul class="manage-items" id="manage-items" aria-live="polite"></ul>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fußbereich: rechtliche Links und Copyright -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a href="index.html" class="logo logo-small" aria-label="LaserFlow – zur Startseite">
+        <svg class="logo-mark" viewBox="2 16 96 96" aria-hidden="true">
+          <defs><linearGradient id="logo-beam-fuss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity="0"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs>
+          <rect class="logo-beam" x="47.5" y="4" width="5" height="54" rx="2.5" fill="url(#logo-beam-fuss)"/>
+          <circle class="logo-core" cx="50" cy="64" r="7"/>
+          <circle class="logo-ring logo-ring-1" cx="50" cy="64" r="16"/>
+          <circle class="logo-ring logo-ring-2" cx="50" cy="64" r="26"/>
+          <circle class="logo-ring logo-ring-3" cx="50" cy="64" r="35"/>
+        </svg>
+        <span class="logo-text">Laser<span class="logo-accent">Flow</span></span>
+      </a>
+      <nav class="footer-links" aria-label="Rechtliches">
+        <a href="#">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="agb.html">AGB</a>
+        <a href="#">Versand</a>
+        <a href="index.html#kontakt">Kontakt</a>
+      </nav>
+      <p>© 2026 LaserFlow – Abschlussprojekt</p>
+    </div>
+  </footer>
+
+</body>
+</html>
