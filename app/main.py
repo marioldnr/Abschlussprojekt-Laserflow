@@ -14,6 +14,7 @@ from app.accounts.account_router import router as account_router
 from app.accounts.account_service import anonymize_pending_accounts
 from app.accounts.employee_router import router as employee_router
 from app.accounts.router import router as accounts_router
+from app.images.router import router as images_router
 from app import config
 from app.database import SessionLocal, init_db
 
@@ -34,6 +35,7 @@ app = FastAPI(title="LaserFlow")
 app.include_router(accounts_router)  # /api/auth/... (Registrieren, Bestätigen, Anmelden)
 app.include_router(account_router)  # /api/account/... (Mein Konto, US10)
 app.include_router(employee_router)  # /api/admin/employees/... (Mitarbeiter verwalten, US15)
+app.include_router(images_router)  # /api/images/... (Kundenbilder hochladen, US04)
 
 
 class FrontendFiles(StaticFiles):
