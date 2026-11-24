@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Platzhalter: Gravurplatte">
+  <rect width="800" height="600" fill="#e8d5b5"/>
+  <rect x="150" y="110" width="500" height="380" rx="28" ry="28" fill="#d4b483" stroke="#b8925c" stroke-width="6"/>
+  <rect x="220" y="170" width="360" height="260" rx="6" ry="6" fill="none" stroke="#7a5c3a" stroke-width="3" stroke-dasharray="12 8"/>
+  <text x="400" y="312" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="48" fill="#7a5c3a">Dein Bild</text>
+</svg>
